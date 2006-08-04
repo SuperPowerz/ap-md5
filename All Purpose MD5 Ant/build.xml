@@ -1,0 +1,90 @@
+<project name="APMD5" default="dist" basedir=".">
+    <description>
+        Build file to build the All Purpose MD5 Application
+    </description>
+
+  <tstamp/>
+	
+  <!-- set global properties for this build -->
+  <property name="src" location="../All Purpose MD5"/>
+  <property name="build" location="build"/>
+  <property name="dist"  location="dist-${DSTAMP}"/>
+  <property name="dist.files" location="dist_files"/>
+  <property name="props" location="${src}/properties"/>
+  <property name="pre.props.folder" location="properties"/>
+  <property name="props.folder" location="${pre.props.folder}/properties"/>
+  <dirset dir="${props}">
+  	<include name="properties"/>
+  	<exclude name="**"/>
+  </dirset>
+  		
+  <dirset dir="${src}">
+  	<include name="gui/**"/>
+  	<include name="com/swtdesigner/**"/>
+  	<include name="exceptions/**"/>
+  	<include name="md5/**"/>
+  	<include name="util/**"/>
+  </dirset>
+  <!-- Exclude these files -->
+  <fileset dir="${src}">
+    <exclude name="**/*Test*"/>
+  </fileset>
+
+	
+  <target name="init">
+    <!-- Create the time stamp -->
+    <!-- <tstamp/> -->
+    <!-- Create the build directory structure used by compile -->
+    <mkdir dir="${build}"/>
+  	<mkdir dir="${pre.props.folder}"/>
+  	<mkdir dir="${props.folder}"/>
+  	<mkdir dir="${dist}/properties"/>
+  </target>
+
+  <target name="compile" depends="init"
+        description="compile the source " >
+    <!-- Compile the java code from ${src} into ${build} -->
+    <javac srcdir="${src}" destdir="${build}"/>
+  </target>
+
+  <target name="dist" depends="compile"
+        description="generate the distribution" >
+    <!-- Create the distribution directory -->
+    <mkdir dir="${dist}"/>
+    	
+    <!-- Put everything in ${build} into the MyProject-${DSTAMP}.jar file -->
+    <jar jarfile="${dist}/APMD5.jar" manifest="MANIFEST.MF" basedir="${build}"/>
+  	
+  	
+    <copy todir="${props.folder}/">
+      <fileset dir="${props}">
+        <!--<include name="**/*"/>-->
+      </fileset>
+    </copy>
+  	<!-- create properties jar -->
+  	<jar jarfile="${dist}/APMD5_properties.jar"	basedir="${pre.props.folder}"/>
+  	
+  	<!-- copy other files to dist directory -->
+    <copy todir="${dist}/">
+      <fileset dir="${dist.files}">
+        <include name="**/*.jar"/>
+        <include name="**/*.dll"/>
+      </fileset>
+    </copy>
+  	<copy todir="${dist}/properties">
+  	 <fileset dir="${props}"/>
+    </copy>
+  	
+  	<!-- delete directories -->
+  	
+  	<delete dir="${pre.props.folder}"/>
+  	<delete dir="${props.folder}"/>
+  </target>
+
+  <target name="clean"
+        description="clean up" >
+    <!-- Delete the ${build} and ${dist} directory trees -->
+    <delete dir="${build}"/>
+    <delete dir="${dist}"/>
+  </target>
+</project>
