@@ -17,6 +17,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import md5.MD5;
+import md5.MD5Functions;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
@@ -242,6 +243,7 @@ public class MD5GUI {
 		calculateButton.addMouseListener(new MouseAdapter() {
 			public void mouseUp(final MouseEvent e) {
 				
+				final MD5Functions md5Functions = new MD5Functions(sLogger, fLogger, display, caculateResultStyledText);
 				final String filename = calculateBrowseStyledText.getText().trim();
 	        	final String string = calculateStringStyledText.getText().trim();
 	        	
@@ -283,7 +285,7 @@ public class MD5GUI {
 				        	if(isDirectory){
 				        		// Calculate has for all files in this directory
 				        		final String md5File = defaultDirectory+"\\"+ file.getName() + MD5Constants.MD5_EXT;
-				        		final PrintWriter pw = openFile(md5File);
+				        		final PrintWriter pw = SimpleIO.openFileForOutput(md5File);
 				        		
 				        		display.asyncExec(
 			        			new Runnable() {
@@ -294,9 +296,9 @@ public class MD5GUI {
 				        		}});
 				        		
 				        		if(recurseDirectory){
-				        			recurseDirectory(file, pw);
+				        			md5Functions.recurseDirectory(file, pw);
 				        		} else {
-				        			singleDirectory(file, pw);
+				        			md5Functions.singleDirectory(file, pw);
 				        		}
 				        		
 				        		
@@ -321,7 +323,7 @@ public class MD5GUI {
 				        		
 				        	} else {
 				        		
-				        		final String hash = calculateMd5(file);
+				        		final String hash = md5Functions.calculateMd5(file);
 				        		
 				        		display.asyncExec(
 			        			new Runnable() {
@@ -351,7 +353,7 @@ public class MD5GUI {
 			        	}// end if(hasFile)
 			        	
 			        	if(hasString){
-			        		final String hash = calculateMd5(string);
+			        		final String hash = md5Functions.calculateMd5(string);
 			        		
 			        		display.asyncExec(
 		        			new Runnable() {
@@ -385,142 +387,142 @@ public class MD5GUI {
 			        	
 			        }// end run()
 			    	
-			    	public String calculateMd5(final File file){
-			    		String hash = null;
-			    		
-			    			// calculate as file
-				    		try {
-								hash = MD5.asHex(MD5.getHash(file));
-							} catch (IOException e) {
-								
-				        		display.asyncExec(
-					        	new Runnable() {
-					        	public void run(){
-									sLogger.logError("Hash Calculation Failed for file " + file.getName() + ". Please check log for more detail");
-					        	}});
-				        		
-								fLogger.log("calculateButton.mouseUp", "Unable to create hash for file " + file.getName());
-								fLogger.log("Exception Message: " + e.getMessage());
-					        	
-							}
-							
-							if(hash == null){
-								sLogger.logError("Failed to create hash for file " + file.getName());
-							}
-			    		
-			    		return hash;
-			    	}// end calculateMd5(File)
+//			    	public String calculateMd5(final File file){
+//			    		String hash = null;
+//			    		
+//			    			// calculate as file
+//				    		try {
+//								hash = MD5.asHex(MD5.getHash(file));
+//							} catch (IOException e) {
+//								
+//				        		display.asyncExec(
+//					        	new Runnable() {
+//					        	public void run(){
+//									sLogger.logError("Hash Calculation Failed for file " + file.getName() + ". Please check log for more detail");
+//					        	}});
+//				        		
+//								fLogger.log("calculateButton.mouseUp", "Unable to create hash for file " + file.getName());
+//								fLogger.log("Exception Message: " + e.getMessage());
+//					        	
+//							}
+//							
+//							if(hash == null){
+//								sLogger.logError("Failed to create hash for file " + file.getName());
+//							}
+//			    		
+//			    		return hash;
+//			    	}// end calculateMd5(File)
+//			    	
+//			    	public String calculateMd5(final String string){
+//			    		String hash = null;
+//			    		
+//		        		MD5 md5 = new MD5();
+//		        	    try {
+//		        			md5.Update(string, null);
+//		        		} catch (UnsupportedEncodingException e) {
+//		        			
+//			        		display.asyncExec(
+//						    new Runnable() {
+//						    public void run(){
+//						    	sLogger.logError("UnsupportedEncodingException, please check log for more detail");
+//						    }});
+//			        		
+//		        			fLogger.log("UnsupportedEncodingException while calculating MD5 for string " + string);
+//		        			fLogger.log("Exception Message: " + e.getMessage());
+//		        		}
+//		        		
+//		        		hash = md5.asHex();
+//		        		
+//						if(hash == null){
+//			        		display.asyncExec(
+//							new Runnable() {
+//							public void run(){
+//								sLogger.logError("Failed to create hash for string " + string);
+//							}});
+//						}
+//						
+//						return hash;
+//			    	}// end calculateMd5(String)
 			    	
-			    	public String calculateMd5(final String string){
-			    		String hash = null;
-			    		
-		        		MD5 md5 = new MD5();
-		        	    try {
-		        			md5.Update(string, null);
-		        		} catch (UnsupportedEncodingException e) {
-		        			
-			        		display.asyncExec(
-						    new Runnable() {
-						    public void run(){
-						    	sLogger.logError("UnsupportedEncodingException, please check log for more detail");
-						    }});
-			        		
-		        			fLogger.log("UnsupportedEncodingException while calculating MD5 for string " + string);
-		        			fLogger.log("Exception Message: " + e.getMessage());
-		        		}
-		        		
-		        		hash = md5.asHex();
-		        		
-						if(hash == null){
-			        		display.asyncExec(
-							new Runnable() {
-							public void run(){
-								sLogger.logError("Failed to create hash for string " + string);
-							}});
-						}
-						
-						return hash;
-			    	}// end calculateMd5(String)
+//			    	public PrintWriter openFile(final String filename) {
+//			    		PrintWriter printWriter = null;
+//			    		
+//			    		try {
+//			    			printWriter = new PrintWriter(new FileOutputStream(filename));
+//						} catch (FileNotFoundException e) {
+//
+//			        		display.asyncExec(
+//							new Runnable() {
+//							public void run(){
+//								sLogger.logError("Unable to find file " + filename + "to write the MD5");
+//							}});
+//			        		
+//							fLogger.log("Unable to find file " + filename + "to write the MD5");
+//							fLogger.log("Exception Message: " + e.getMessage());
+//							
+//							throw new RuntimeException("Unable to find file " + filename);
+//						}
+//						
+//						return printWriter;
+//			    	}// end openFile(String)
 			    	
-			    	public PrintWriter openFile(final String filename) {
-			    		PrintWriter printWriter = null;
-			    		
-			    		try {
-			    			printWriter = new PrintWriter(new FileOutputStream(filename));
-						} catch (FileNotFoundException e) {
-
-			        		display.asyncExec(
-							new Runnable() {
-							public void run(){
-								sLogger.logError("Unable to find file " + filename + "to write the MD5");
-							}});
-			        		
-							fLogger.log("Unable to find file " + filename + "to write the MD5");
-							fLogger.log("Exception Message: " + e.getMessage());
-							
-							throw new RuntimeException("Unable to find file " + filename);
-						}
-						
-						return printWriter;
-			    	}// end openFile(String)
-			    	
-			    	public void recurseDirectory(final File file, PrintWriter pw){
-			    		
-			    		if(file.isDirectory()){
-			    			File files[] = file.listFiles();
-			        		for(int i=0; i<files.length; i++){
-			        			if(files[i] != null){
-			        				recurseDirectory(files[i], pw);
-			        			}
-			        		}
-			        		
-			    		} else {
-			        		display.asyncExec(
-		        			new Runnable() {
-		        			public void run(){		        				
-		        				sLogger.log("Calculating MD5 for file " + file.getName() + "...");
-			        		}});
-			        					    			
-			    			final String hash = calculateMd5(file);
-			    			
-			    			pw.println(hash+" "+file.getName());
-			    			
-			        		display.asyncExec(
-		        			new Runnable() {
-		        			public void run(){		
-		        				caculateResultStyledText.append(hash+" "+file.getName()+"\n");
-			        		}});
-			    			
-			    		}
-			    	}// end recurseFiles
-			    	
-			    	public void singleDirectory(final File file, PrintWriter pw){
-			    		
-			    		File files[] = file.listFiles();
-			    		
-		        		for(int i=0; i<files.length; i++){
-		        			if(files[i] != null){
-		        				if(!files[i].isDirectory()){
-					        		display.asyncExec(
-				        			new Runnable() {
-				        			public void run(){		
-				        				sLogger.log("Calculating MD5 for file " + file.getName() + "...");
-					        		}});
-
-					    			final String hash = calculateMd5(file);
-					    			pw.println(hash+" "+file.getName());
-					    			
-					        		display.asyncExec(
-				        			new Runnable() {
-				        			public void run(){		
-				        				caculateResultStyledText.append(hash+" "+file.getName());
-					        		}});
-					        		
-		        					
-		        				}// end if not directory
-		        			}// end if != null 
-		        		}// end for 
-			    	}// end singleDirectory
+//			    	public void recurseDirectory(final File file, PrintWriter pw){
+//			    		
+//			    		if(file.isDirectory()){
+//			    			File files[] = file.listFiles();
+//			        		for(int i=0; i<files.length; i++){
+//			        			if(files[i] != null){
+//			        				recurseDirectory(files[i], pw);
+//			        			}
+//			        		}
+//			        		
+//			    		} else {
+//			        		display.asyncExec(
+//		        			new Runnable() {
+//		        			public void run(){		        				
+//		        				sLogger.log("Calculating MD5 for file " + file.getName() + "...");
+//			        		}});
+//			        					    			
+//			    			final String hash = calculateMd5(file);
+//			    			
+//			    			pw.println(hash+" "+file.getName());
+//			    			
+//			        		display.asyncExec(
+//		        			new Runnable() {
+//		        			public void run(){		
+//		        				caculateResultStyledText.append(hash+" "+file.getName()+"\n");
+//			        		}});
+//			    			
+//			    		}
+//			    	}// end recurseFiles
+//			    	
+//			    	public void singleDirectory(final File file, PrintWriter pw){
+//			    		
+//			    		File files[] = file.listFiles();
+//			    		
+//		        		for(int i=0; i<files.length; i++){
+//		        			if(files[i] != null){
+//		        				if(!files[i].isDirectory()){
+//					        		display.asyncExec(
+//				        			new Runnable() {
+//				        			public void run(){		
+//				        				sLogger.log("Calculating MD5 for file " + file.getName() + "...");
+//					        		}});
+//
+//					    			final String hash = calculateMd5(file);
+//					    			pw.println(hash+" "+file.getName());
+//					    			
+//					        		display.asyncExec(
+//				        			new Runnable() {
+//				        			public void run(){		
+//				        				caculateResultStyledText.append(hash+" "+file.getName());
+//					        		}});
+//					        		
+//		        					
+//		        				}// end if not directory
+//		        			}// end if != null 
+//		        		}// end for 
+//			    	}// end singleDirectory
 			
 			    };
 			    
@@ -665,7 +667,7 @@ public class MD5GUI {
 		final Button testButton = new Button(testInputGroup, SWT.NONE);
 		testButton.addMouseListener(new MouseAdapter() {
 			public void mouseUp(final MouseEvent e) {
-	
+				final MD5Functions md5Functions = new MD5Functions(sLogger, fLogger, display);
 				final String md5Filename = testMd5FileStyledText.getText().trim();
 				final boolean hasFile = !testFileToBeTestedStyledText.getText().equalsIgnoreCase("");
 				final boolean hasMd5File = !md5Filename.equalsIgnoreCase("");
@@ -695,7 +697,7 @@ public class MD5GUI {
 			    		// calculate MD5 for file
 			    		final File file = new File(filename);
 		        		
-		        		final String hash = calculateMd5(file);
+		        		final String hash = md5Functions.calculateMd5(file);
 
 						if(hash == null){
 							display.asyncExec(
@@ -813,49 +815,49 @@ public class MD5GUI {
 
 			    	}
 			    	
-		    		public String calculateMd5(final File file){
-			    		String hash = null;
-			    		
-			    			// calculate as file
-				    		try {
-								hash = MD5.asHex(MD5.getHash(file));
-							} catch (final IOException e) {
-								display.asyncExec(
-								new Runnable() {
-								public void run(){
-									sLogger.logError("Hash Calculation Failed for file " + file.getName() + ". Please check log for more detail");
-									fLogger.log("calculateButton.mouseUp", "Unable to create hash for file " + file.getName());
-									fLogger.log("Exception Message: " + e.getMessage());
-								}});
-							}
-							
-							if(hash == null){
-								sLogger.logError("Failed to create hash for file " + file.getName());
-							}
-			    		
-			    		return hash;
-			    	}// end calculateMd5(File)
-			    	
-			    	public String calculateMd5(String string){
-			    		String hash = null;
-			    		
-		        		MD5 md5 = new MD5();
-		        	    try {
-		        			md5.Update(string, null);
-		        		} catch (UnsupportedEncodingException e) {
-		        			sLogger.logError("UnsupportedEncodingException, please check log for more detail");
-		        			fLogger.log("UnsupportedEncodingException while calculating MD5 for string " + string);
-		        			fLogger.log("Exception Message: " + e.getMessage());
-		        		}
-		        		
-		        		hash = md5.asHex();
-		        		
-						if(hash == null){
-							sLogger.logError("Failed to create hash for string " + string);
-						}
-						
-						return hash;
-			    	}// end calculateMd5(String)
+//		    		public String calculateMd5(final File file){
+//			    		String hash = null;
+//			    		
+//			    			// calculate as file
+//				    		try {
+//								hash = MD5.asHex(MD5.getHash(file));
+//							} catch (final IOException e) {
+//								display.asyncExec(
+//								new Runnable() {
+//								public void run(){
+//									sLogger.logError("Hash Calculation Failed for file " + file.getName() + ". Please check log for more detail");
+//									fLogger.log("calculateButton.mouseUp", "Unable to create hash for file " + file.getName());
+//									fLogger.log("Exception Message: " + e.getMessage());
+//								}});
+//							}
+//							
+//							if(hash == null){
+//								sLogger.logError("Failed to create hash for file " + file.getName());
+//							}
+//			    		
+//			    		return hash;
+//			    	}// end calculateMd5(File)
+//			    	
+//			    	public String calculateMd5(String string){
+//			    		String hash = null;
+//			    		
+//		        		MD5 md5 = new MD5();
+//		        	    try {
+//		        			md5.Update(string, null);
+//		        		} catch (UnsupportedEncodingException e) {
+//		        			sLogger.logError("UnsupportedEncodingException, please check log for more detail");
+//		        			fLogger.log("UnsupportedEncodingException while calculating MD5 for string " + string);
+//		        			fLogger.log("Exception Message: " + e.getMessage());
+//		        		}
+//		        		
+//		        		hash = md5.asHex();
+//		        		
+//						if(hash == null){
+//							sLogger.logError("Failed to create hash for string " + string);
+//						}
+//						
+//						return hash;
+//			    	}// end calculateMd5(String)
 	
 				};
 				
