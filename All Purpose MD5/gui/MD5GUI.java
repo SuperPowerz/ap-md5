@@ -1033,18 +1033,22 @@ public class MD5GUI {
 		// find and remove the last element if > # of stats defined
 		int itemCount = statsTable.getItemCount();
 		if(itemCount >= numberOfStatsKept){
-			statsTable.getItem(--itemCount).dispose();
+			if(itemCount > 0){
+				statsTable.getItem(--itemCount).dispose();
+			}
 		}
 		
 		// Add the new table item
-		final TableItem ti = new TableItem(statsTable, SWT.BORDER, index);
-		ti.setText(4, stopTime);
-		ti.setText(3, startTime);
-		ti.setText(2, timeElapsed);
-		ti.setText(1, filename);
-		ti.setText(0, Integer.toString(++index));
-		
-		changeExistingRowsNumber(index);
+		if(numberOfStatsKept > 0){
+			final TableItem ti = new TableItem(statsTable, SWT.BORDER, index);
+			ti.setText(4, stopTime);
+			ti.setText(3, startTime);
+			ti.setText(2, timeElapsed);
+			ti.setText(1, filename);
+			ti.setText(0, Integer.toString(++index));
+			
+			changeExistingRowsNumber(index);
+		}
 	}
 	
 	

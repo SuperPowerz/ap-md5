@@ -20,6 +20,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
@@ -89,14 +90,16 @@ public class MD5Options {
 
 		final Group colorGroup = new Group(composite, SWT.NONE);
 		colorGroup.setText("Color");
-		colorGroup.setBounds(15, 25, 210, 131);
+		colorGroup.setBounds(15, 25, 210, 146);
 
 		final Button backgroundButton = new Button(colorGroup, SWT.NONE);
 		backgroundButton.addMouseListener(new MouseAdapter() {
 			public void mouseUp(final MouseEvent e) {
 				ColorDialog cd = new ColorDialog(shell);
 				cd.open();
-				backgroundLabel.setBackground(new Color(Display.getDefault(), cd.getRGB()));
+				if(cd.getRGB() != null){
+					backgroundLabel.setBackground(new Color(Display.getDefault(), cd.getRGB()));
+				}
 			}
 		});
 		backgroundButton.setText("Background");
@@ -108,7 +111,9 @@ public class MD5Options {
 				ColorDialog cd = new ColorDialog(shell);
 				cd.open();
 
-				textLabel.setBackground(new Color(Display.getDefault(), cd.getRGB()));
+				if(cd.getRGB() != null){
+					textLabel.setBackground(new Color(Display.getDefault(), cd.getRGB()));
+				}
 			}
 		});
 		textButton.setBounds(15, 92, 80, 20);
@@ -123,8 +128,9 @@ public class MD5Options {
 			public void mouseUp(final MouseEvent e) {
 				ColorDialog cd = new ColorDialog(shell);
 				cd.open();
-
-				foregroundLabel.setBackground(new Color(Display.getDefault(), cd.getRGB()));
+				if(cd.getRGB() != null){
+					foregroundLabel.setBackground(new Color(Display.getDefault(), cd.getRGB()));
+				}
 			}
 		});
 		foregroundButton.setBounds(15, 58, 80, 20);
@@ -138,9 +144,13 @@ public class MD5Options {
 		textLabel.setBounds(115, 92, 25, 20);
 		textLabel.setBackground(SWTResourceManager.getColor(234, 234, 234));
 
+		final Label notCurrentlyLabel = new Label(colorGroup, SWT.NONE);
+		notCurrentlyLabel.setText("** not currently supported");
+		notCurrentlyLabel.setBounds(10, 123, 140, 18);
+
 		final Group statisticsGroup = new Group(composite, SWT.NONE);
 		statisticsGroup.setText("Statistics");
-		statisticsGroup.setBounds(15, 162, 210, 91);
+		statisticsGroup.setBounds(15, 177, 210, 91);
 
 		statsEnabledButton = new Button(statisticsGroup, SWT.CHECK);
 		statsEnabledButton.setText("Stats Enabled");
@@ -245,6 +255,11 @@ public class MD5Options {
 					fLogger.log("Unable to read properties file " + MD5Constants.PROPERTIES_FILE_DEFULT);
 					fLogger.log("Exception Message: " + e1.getMessage());
 				}
+				
+				MD5GUI.setEnableStats(defaultProps.getProperty(MD5Constants.STATS_ON).equalsIgnoreCase("true"));
+				MD5GUI.setDefaultDirectory(defaultProps.getProperty(MD5Constants.DEFAULT_DIRECTORY));
+				MD5GUI.setNumberOfStatsKept(Integer.parseInt(defaultProps.getProperty(MD5Constants.STATS_NUMBER_KEPT)));
+				MD5GUI.setRecurseDirectory(defaultProps.getProperty(MD5Constants.RECURSE_DIRECTORY).equalsIgnoreCase("true"));
 				
 				try {
 					defaultProps.store(new FileOutputStream(new File(MD5Constants.PROPERTIES_FILE)), "Reset to defaults");
