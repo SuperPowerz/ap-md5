@@ -1,11 +1,14 @@
 package util;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+
+import exceptions.CanNotWriteToFileException;
 
 public class SimpleIO {
 
@@ -14,15 +17,19 @@ public class SimpleIO {
 	 * @param filename
 	 * @return
 	 */
-	public static PrintWriter openFileForOutput(String filename){
+	public static PrintWriter openFileForOutput(String filename) throws CanNotWriteToFileException {
 		if(filename == null){
 			return null;
 		}
 		
 		PrintWriter pw = null;
+		File file = new File(filename);
+		if(!file.canWrite()){
+			throw new CanNotWriteToFileException("Unable to write to file " + filename);
+		}
 		
 		try {
-			pw = new PrintWriter(new FileOutputStream(filename));
+			pw = new PrintWriter(new FileOutputStream(file));
 		} catch (FileNotFoundException e) {
 			return null;
 		}
@@ -69,4 +76,10 @@ public class SimpleIO {
 			}
 		}
 	}
+	
+	public static boolean exists(String filename){
+		File file = new File(filename);
+		return(file.exists());
+	}
+	
 }
