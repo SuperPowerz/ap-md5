@@ -887,6 +887,8 @@ public class MD5GUI {
 		final MenuItem viewLogMenuItem = new MenuItem(menu_2, SWT.NONE);
 		viewLogMenuItem.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(final SelectionEvent e) {
+				// close the log to view the latest changes
+				fLogger.close();
 				MD5ReadPanel readMe = new MD5ReadPanel();
 				readMe.open(MD5Constants.LOG_FILE_NAME);
 			}
@@ -900,10 +902,15 @@ public class MD5GUI {
 				MessageBox mb = new MessageBox(shell, SWT.OK | SWT.ICON_INFORMATION);
 				mb.setText("About");
 				
-				sb.append("All Purpose MD5.\n");
-				sb.append("Written By Nick Powers\n");
-				sb.append("Version 0.1\n");
-				sb.append("http://www.apmd5.com");
+				sb.append(MD5Constants.PROGRAM_NAME);
+				sb.append("\n");
+				sb.append("Author(s) ");
+				sb.append(MD5Constants.AUTHORS);
+				sb.append("\n");
+				sb.append("Version ");
+				sb.append(MD5Constants.VERSION);
+				sb.append("\n");
+				sb.append(MD5Constants.WEBSITE);
 				
 				mb.setMessage(sb.toString());
 				mb.open();
