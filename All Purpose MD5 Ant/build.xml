@@ -10,6 +10,8 @@
   <property name="build" location="build"/>
   <property name="dist"  location="dist-${DSTAMP}"/>
   <property name="dist.files" location="dist_files"/>
+  <property name="dist.images" location="images"/>
+  <property name="images.dir" location="${src}/images"/>
   <property name="props" location="${src}/properties"/>
   <property name="pre.props.folder" location="properties"/>
   <property name="props.folder" location="${pre.props.folder}/properties"/>
@@ -39,6 +41,7 @@
   	<mkdir dir="${pre.props.folder}"/>
   	<mkdir dir="${props.folder}"/>
   	<mkdir dir="${dist}/properties"/>
+  	<mkdir dir="${dist}/images"/>
   </target>
 
   <target name="compile" depends="init"
@@ -75,6 +78,11 @@
   	<copy todir="${dist}/properties">
   	 <fileset dir="${props}"/>
     </copy>
+  	
+  	<!-- copy images directory -->
+  	<copy todir="${dist}/images">
+  		<fileset dir="${images.dir}"/>
+  	</copy>
   	
   	<!-- delete directories -->
   	
