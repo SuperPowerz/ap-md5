@@ -81,11 +81,16 @@ public class MD5ReadPanel {
 	public void setTextFromFile(String filename){
 		BufferedReader br = SimpleIO.openFileForInput(filename);
 		String line = null;
+		
 		try {
-			while((line = br.readLine()) != null){
-				readMeStyledText.append(line + "\n");
+			if(br != null){
+				while((line = br.readLine()) != null){
+					readMeStyledText.append(line + "\n");
+				}
+			} else {
+				readMeStyledText.setText("Oops, loading of file " + filename +" failed");
 			}
-
+			
 		} catch (IOException e) {
 			return;
 		} finally {
