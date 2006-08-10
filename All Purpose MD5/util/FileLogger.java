@@ -10,6 +10,7 @@ public class FileLogger {
 	private FileWriter fWriter = null;
 	private boolean isClosed = true;
 	private static final String DEFAULT_FILENAME = MD5Constants.LOG_FILE_NAME;
+	private String filename = null;
 	private final StringBuffer logBuffer = new StringBuffer();
 	private boolean willAppend = true;
 	
@@ -19,6 +20,7 @@ public class FileLogger {
 		}
 		
 		isClosed = false;
+		filename = DEFAULT_FILENAME;
 	}
 	
 	public FileLogger(String logName){
@@ -27,11 +29,16 @@ public class FileLogger {
 		}
 		openLog(logName);
 		isClosed = false;
+		filename = logName;
 	}
 	
 	public void log(String message){
 		if(message == null){
 			return;
+		}
+		
+		if(isClosed){
+			reopen();
 		}
 		
 		logBuffer.append(getDate());
@@ -51,6 +58,10 @@ public class FileLogger {
 	public void log(String method, String message){
 		if(method == null || message == null){
 			return;
+		}
+		
+		if(isClosed){
+			reopen();
 		}
 		
 		logBuffer.append(new Date());
@@ -82,10 +93,18 @@ public class FileLogger {
 		}
 	}
 	
+	public void reopen(){
+		openLog(filename);
+		isClosed = false;
+	}
+	
 	public boolean isOpen(){
 		return (!isClosed);
 	}
 	
+	public void setWillAppend(boolean bool){
+		willAppend = bool;
+	}
 	
 	private void openLog(String filename){
 		try {
@@ -94,10 +113,6 @@ public class FileLogger {
 			System.out.println("Had IO problems writing to file " + filename);
 			e.printStackTrace();
 		}
-	}
-	
-	public void setWillAppend(boolean bool){
-		willAppend = bool;
 	}
 	
 	private Date getDate(){
