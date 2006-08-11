@@ -10,14 +10,15 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Properties;
+import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import md5.MD5;
 import md5.MD5Functions;
 
 import org.eclipse.swt.SWT;
@@ -61,7 +62,7 @@ public class MD5GUI {
 	protected Shell shell;
 	private Display display = null;
 	
-	private String[] regExPatterns = null;
+	private List<String> regExPatterns = new ArrayList<String>();
 	private String tempText = null;
 	private boolean msgBoxBool = false;
 	
@@ -136,14 +137,14 @@ public class MD5GUI {
         		sLogger.logError("Could not load properties. " + e.getMessage());
         		ok = false;
         	}
-		        	
-        	populateRegExPatterns();
         	
         	if(ok){
         		sLogger.log("Initialization Complete");
         	}
         	// load stats from properties file
-        	loadStats();
+        	if(enableStats){
+        		loadStats();
+        	}
 
         	// Start Input Loop
         	start();
@@ -633,16 +634,16 @@ public class MD5GUI {
 							
 								try {
 									while((line = br.readLine()) != null){
-										for(int i=0; i < regExPatterns.length; i++){
-											if(regExPatterns != null){
-												pattern = Pattern.compile(regExPatterns[i]);
+										for(String regex : regExPatterns){
+											if(regex != null){
+												pattern = Pattern.compile(regex);
 												matcher = pattern.matcher(line);
 												
 												if(matcher.matches()){
 													hash2 = matcher.group(1);
 													break;
 												}
-											}// end if
+											}
 										}// end for
 										
 									}// end while
@@ -826,7 +827,7 @@ public class MD5GUI {
 	        			return;
 	        		}
 					
-        			display.asyncExec(
+        			display.syncExec(
     				new Runnable() {
     				public void run(){
     					tempText = caculateResultStyledText.getText();
@@ -1020,6 +1021,16 @@ public class MD5GUI {
 			}
 		}
 		
+		// Regular Expressions for getting the MD5 out of a file
+		prop = properties.getProperty(MD5Constants.REGEX_PATTERNS);
+		checkProperty(prop, MD5Constants.REGEX_PATTERNS);
+		StringTokenizer st = new StringTokenizer(prop, MD5Constants.REGEX_DELIM);
+		while(st.hasMoreTokens()){
+			regExPatterns.add(st.nextToken());
+		}
+
+		
+		
 		backgroundColor = new Color(Display.getDefault(), new RGB(backgroundColorR, backgroundColorG, backgroundColorB));
 		foregroundColor = new Color(Display.getDefault(), new RGB(foregroundColorR, foregroundColorG, foregroundColorB));
 		textColor = new Color(Display.getDefault(), new RGB(textColorR, textColorG, textColorB));
@@ -1151,6 +1162,11 @@ public class MD5GUI {
 	public String getNextProperty(Properties props, int index){
 		String value = null;
 		
+		// don't load more than what is declared in options
+		if(index >= numberOfStatsKept){
+			return null;
+		}
+		
 		value = props.getProperty(MD5Constants.STATS_PROP_BASE_NAME + index + ".0");
 		if(value == null || StringUtil.equalIgnoreCase(value, "")){
 			return null;
@@ -1162,7 +1178,15 @@ public class MD5GUI {
 	public String getTime(long time1, long time2, String formatType){
 		String time = null;
 		
-		Date date = new Date(time2 - time1);
+		Date date = null;
+		if(time1 <= 0){
+			date = new Date(time2);
+		} else if(time2 <= 0){
+			date = new Date(time1);
+		} else {
+			date = new Date(time2 - time1);
+		}
+		
 		SimpleDateFormat formatter = new SimpleDateFormat(formatType); 
 		time = formatter.format(date);
 		
@@ -1208,12 +1232,6 @@ public class MD5GUI {
 			fLogger.log("Unable to store properties file " + MD5Constants.PROPERTIES_FILE);
 			fLogger.log("Exception Message: " + e1.getMessage());
 		}
-	}
-	
-	public void populateRegExPatterns(){
-		regExPatterns = new String[2];
-		regExPatterns[0] = MD5Constants.MD5_REGEX_1;
-		regExPatterns[1] = MD5Constants.MD5_REGEX_2;
 	}
 	
 	public static boolean getEnableStats(){
