@@ -325,11 +325,13 @@ public class MD5Options {
 			sLogger.logError("Unable to find properties file " + MD5Constants.PROPERTIES_FILE);
 			fLogger.log("Unable to find properties file " + MD5Constants.PROPERTIES_FILE);
 			fLogger.log("Exception Message: " + e1.getMessage());
+			return;
 
 		} catch (IOException e1) {
 			sLogger.logError("Unable to read properties file " + MD5Constants.PROPERTIES_FILE);
 			fLogger.log("Unable to read properties file " + MD5Constants.PROPERTIES_FILE);
 			fLogger.log("Exception Message: " + e1.getMessage());
+			return;
 		}
 		
 		int br = Integer.parseInt(props.getProperty(MD5Constants.BACKGROUND_COLOR_R));
