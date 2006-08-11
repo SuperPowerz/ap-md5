@@ -33,10 +33,11 @@ public interface MD5Constants {
 	
 	public static int STATS_NUM_COLS = 5;
 	
+	public static String REGEX_PATTERNS = "regex.patterns";
+	
 	public static String README_FILE_NAME = "properties/README";
 	
-	public static String MD5_REGEX_1 = "(\\w{32}+)(\\s+)(.*)";
-	public static String MD5_REGEX_2 = "(\\w{32}+)";
+	public static String REGEX_DELIM = ":";
 	
 	public static String TIME_FORMAT = "mm:ss:SS";
 	public static String TIME_FORMAT_SHORT = "ss:SS";
