@@ -23,40 +23,72 @@ public class ScreenLogger {
 	}
 	
 	public void log(String message){
+		if(message == null){
+			return;
+		}
+		
 		logObject.setText(message);
 	}
 	
 	public void log(String message, String color){
+		if(message == null || color == null){
+			return;
+		}
+		
 		logObject.setText(message);
 		logObject.setStyleRange(new StyleRange(0, message.length(), getColor(color), getColor(BACKGROUND_COLOR), SWT.NONE));
 	}
 	
 	public void log(String message, String color, int fontStyle){
+		if(message == null || color == null){
+			return;
+		}
+		
 		logObject.setText(message);
 		logObject.setStyleRange(new StyleRange(0, message.length(), getColor(color), getColor(BACKGROUND_COLOR), fontStyle));
 	}
 	
 	public void logAppend(String message){
+		if(message == null){
+			return;
+		}
+		
 		logObject.append(message);
 	}
 	
 	public void logAppend(String message, String color){
+		if(message == null || color == null){
+			return;
+		}
+		
 		int length = message.length() + logObject.getText().length();
 		logObject.append(message);
 		logObject.setStyleRange(new StyleRange(0, length, getColor(color), getColor(BACKGROUND_COLOR), SWT.NONE));
 	}
 	
 	public void logAppend(String message, String color, int fontStyle){
+		if(message == null || color == null){
+			return;
+		}
+		
 		int length = message.length() + logObject.getText().length();
 		logObject.append(message);
 		logObject.setStyleRange(new StyleRange(0, length, getColor(color), getColor(BACKGROUND_COLOR), fontStyle));
 	}
 	
 	public void logWarn(String message){
+		if(message == null ){
+			return;
+		}
+		
 		log(WARNING+message, WARNING_COLOR);
 	}
 	
 	public void logError(String message){
+		if(message == null){
+			return;
+		}
+		
 		log(ERROR+message, ERROR_COLOR);
 	}
 	
@@ -65,6 +97,10 @@ public class ScreenLogger {
 	}
 	
 	private Color getColor(String color){
+		if(color == null){
+			return Display.getCurrent().getSystemColor(SWT.COLOR_BLACK);
+		}
+		
 		Color realColor = null;
 		
 		if(color.equalsIgnoreCase("red")){
