@@ -200,7 +200,7 @@ public class MD5GUI {
 	 */
 	protected void createContents() {
 		shell = new Shell(SWT.MIN | SWT.TITLE);
-		shell.setImage(SWTResourceManager.getImage(MD5GUI.class, "/images/apmd5_icon.png"));
+		shell.setImage(SWTResourceManager.getImage("images/apmd5_icon.png"));
 		shell.addDisposeListener(new DisposeListener() {
 			public void widgetDisposed(final DisposeEvent e) {
 
