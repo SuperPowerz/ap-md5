@@ -24,8 +24,10 @@ public class SimpleIO {
 		
 		PrintWriter pw = null;
 		File file = new File(filename);
-		if(!file.canWrite()){
-			throw new CanNotWriteToFileException("Unable to write to file " + filename);
+		if(file.exists()){
+			if(!file.canWrite()){
+				throw new CanNotWriteToFileException("Unable to write to file " + filename);
+			}
 		}
 		
 		try {
