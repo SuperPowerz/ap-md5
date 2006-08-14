@@ -59,7 +59,7 @@ public class MD5ReadPanel {
 	 */
 	protected void createContents() {
 		shell = new Shell();
-		shell.setImage(SWTResourceManager.getImage(MD5ReadPanel.class, "/images/apmd5_icon.png"));
+		shell.setImage(SWTResourceManager.getImage("images/apmd5_icon.png"));
 		shell.setLayout(new FillLayout());
 		shell.setSize(766, 526);
 
