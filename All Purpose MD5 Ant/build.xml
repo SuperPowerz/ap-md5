@@ -68,7 +68,7 @@
   	<!-- create properties jar -->
   	<jar jarfile="${dist}/APMD5_properties.jar"	basedir="${pre.props.folder}"/>
   	
-  	<!-- copy other files to dist directory -->
+  	<!-- copy jar and dll files to dist directory -->
     <copy todir="${dist}/">
       <fileset dir="${dist.files}">
         <include name="**/*.jar"/>
@@ -82,6 +82,14 @@
   	<!-- copy images directory -->
   	<copy todir="${dist}/images">
   		<fileset dir="${images.dir}"/>
+  	</copy>
+  	
+  	<!-- copy gpl license and other text files -->
+  	<copy todir="${dist}">
+  		<fileset dir="${src}">
+  			<include name="**/gpl.txt"/>
+  			<include name="**/install.txt"/>
+  		</fileset>
   	</copy>
   	
   	<!-- delete directories -->
