@@ -9,6 +9,7 @@ import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Display;
 
 import util.FileLogger;
+import util.MD5Constants;
 import util.ScreenLogger;
 
 public class MD5Functions {
@@ -100,12 +101,12 @@ public class MD5Functions {
     					    			
 			final String hash = calculateMd5(file);
 			
-			pw.println(hash+" "+file.getName());
+			pw.println(hash+ MD5Constants.MD5_SPACER +file.getName());
 			
     		display.asyncExec(
 			new Runnable() {
 			public void run(){		
-				resultText.append(hash+" "+file.getName()+"\n");
+				resultText.append(hash+ MD5Constants.MD5_SPACER +file.getName()+"\n");
     		}});
 			
 		}
@@ -125,12 +126,12 @@ public class MD5Functions {
 	        		}});
 
 	    			final String hash = calculateMd5(file);
-	    			pw.println(hash+" "+file.getName());
+	    			pw.println(hash+ MD5Constants.MD5_SPACER +file.getName());
 	    			
 	        		display.asyncExec(
         			new Runnable() {
         			public void run(){		
-        				resultText.append(hash+" "+file.getName());
+        				resultText.append(hash+ MD5Constants.MD5_SPACER +file.getName());
 	        		}});
 	        		
 					
