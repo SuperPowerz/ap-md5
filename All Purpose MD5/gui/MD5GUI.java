@@ -112,6 +112,7 @@ public class MD5GUI {
 	public static int statsNumber = 1;
 	
 	public static String defaultDirectory = null;
+	
 
 	/**
 	 * Launch the application
@@ -250,10 +251,11 @@ public class MD5GUI {
 				final String filename = calculateBrowseStyledText.getText().trim();
 	        	final String string = calculateStringStyledText.getText().trim();
 	        	
+	        	calculateButton.setEnabled(false);
+	        	
 			    final Thread worker = new Thread() {
 			    	public void run() {
 
-			        	//String hash = null;
 			        	final boolean hasFile = !(filename == null || filename.equalsIgnoreCase(""));
 			        	final boolean hasString = !(string == null || string.equalsIgnoreCase(""));
 			        	boolean isDirectory = false;
@@ -266,6 +268,7 @@ public class MD5GUI {
 			        			new Runnable() {
 			        			public void run(){
 			        				sLogger.logWarn("No file, directory or String is specified. Please choose a file, directory or enter a String");
+			        				calculateButton.setEnabled(true);
 			        		}});
 			        		
 			        		return;
@@ -281,6 +284,7 @@ public class MD5GUI {
 					        	new Runnable() {
 					        	public void run(){
 					        		sLogger.logError("File does not exist! Not calculating MD5");
+					        		calculateButton.setEnabled(true);
 					        	}});
 				        		return;
 			        		}
@@ -313,6 +317,12 @@ public class MD5GUI {
 						        	}});
 									
 					        		if(msgBoxBool){
+					        			display.asyncExec(
+									    new Runnable() {
+									    public void run(){
+									    	calculateButton.setEnabled(true);
+										}});
+					        			
 					        			return;
 					        		}
 				        		}
@@ -324,6 +334,7 @@ public class MD5GUI {
 								    new Runnable() {
 								    public void run(){
 								    	sLogger.logError("Can not write to file " + md5File +". Did not create MD5(s)");
+								    	calculateButton.setEnabled(true);
 								    }});
 				        			return;
 				        		}
@@ -353,6 +364,7 @@ public class MD5GUI {
 									addTableItem(file.getName(), timeElapsed, startTime, endTime, 0);
 									
 			        				sLogger.log("File Hash(s) created in file " + md5File + ". " + timeElapsed + " seconds");
+			        				calculateButton.setEnabled(true);
 				        		}});
 				        		
 				        		
@@ -371,6 +383,8 @@ public class MD5GUI {
 
 								if(hash == null){
 									sLogger.logError("Failed to create hash for file " + file.getName());
+									calculateButton.setEnabled(true);
+									return;
 								}
 								
 		        				long currentTime = System.currentTimeMillis();
@@ -378,11 +392,12 @@ public class MD5GUI {
 								String startTime = getTime(0, timeAtStart, MD5Constants.TIME_FORMAT_START_END);
 								String endTime = getTime(0, currentTime, MD5Constants.TIME_FORMAT_START_END);
 								
-								caculateResultStyledText.setText(hash+" "+file.getName());
+								caculateResultStyledText.setText(hash+ MD5Constants.MD5_SPACER +file.getName());
 								
 								addTableItem(file.getName(), timeElapsed, startTime, endTime, 0);
 								
 								sLogger.log("File Hash created. " + timeElapsed + " seconds");
+								calculateButton.setEnabled(true);
 										
 				        		}});
 								
@@ -400,6 +415,8 @@ public class MD5GUI {
 
 			        		if(hash == null){
 			        			sLogger.logError("Failed to create hash for string " + string);
+			        			calculateButton.setEnabled(true);
+			        			return;
 			        		}
 			        		
 	        				long currentTime = System.currentTimeMillis();
@@ -408,14 +425,16 @@ public class MD5GUI {
 							String endTime = getTime(0, currentTime, MD5Constants.TIME_FORMAT_START_END);
 							
 			        		if(hasFile){
-			        			caculateResultStyledText.append("\n"+hash+" "+string);
+			        			caculateResultStyledText.append("\n"+hash+ MD5Constants.MD5_SPACER +string);
 			        		} else {
-			        			caculateResultStyledText.setText(hash+" "+string);
+			        			caculateResultStyledText.setText(hash+ MD5Constants.MD5_SPACER +string);
 			        		}
 							
 							addTableItem(string, timeElapsed, startTime, endTime, 0);
 							
 			        		sLogger.log("Hash(s) created. " + timeElapsed + " seconds");	
+			        		
+			        		calculateButton.setEnabled(true);
 	        				
 		        			}});
 
@@ -426,7 +445,7 @@ public class MD5GUI {
 			    };
 			    
 			    worker.start();
-				
+			    
 			}
 		});
 		calculateButton.setBounds(175, 214,115, 25);
@@ -591,10 +610,11 @@ public class MD5GUI {
 				final String filename = testFileToBeTestedStyledText.getText().trim();
 				final String md5String = testPasteTypeMd5styledText.getText().trim();
 				
+				testButton.setEnabled(false);
+				
 				final Thread testWorker = new Thread() {
 			    	public void run() {
 			    		final long timeAtStart = System.currentTimeMillis();
-			    		//String hash1 = null;
 			    		String hash2 = null;
 			    		
 			    		// calculate MD5 for file
@@ -604,12 +624,17 @@ public class MD5GUI {
 							new Runnable() {
 							public void run(){
 								sLogger.logError("Unable to open file " + file.getName());
+								testButton.setEnabled(true);
 							}});
 							return;
 						}
 		        		
-			    		
-			    		
+						display.asyncExec(
+								new Runnable() {
+								public void run(){
+									sLogger.log("Testing...");
+								}});
+
 		        		final String hash = md5Functions.calculateMd5(file);
 
 						if(hash == null){
@@ -617,6 +642,8 @@ public class MD5GUI {
 							new Runnable() {
 							public void run(){
 								sLogger.logError("Failed to create hash for file " + filename);
+								testButton.setEnabled(true);
+								return;
 							}});
 							
 						}
@@ -708,7 +735,7 @@ public class MD5GUI {
 																
 									sLogger.log("File and MD5 hash are equal! " + timeElapsed + " seconds","dark-green");
 									testResultStyledText.setText("Hashs are equal!");
-									testResultStyledText.append("\n"+hash+" "+file.getName());
+									testResultStyledText.append("\n"+hash+ MD5Constants.MD5_SPACER +file.getName());
 									testResultStyledText.append("\n"+hashDisplay+" MD5 Hash");
 									
 								}});
@@ -720,18 +747,23 @@ public class MD5GUI {
 											
 									sLogger.log("File and MD5 hash are NOT equal! " + timeElapsed + " seconds", "red");
 									testResultStyledText.setText("Hashs are NOT equal!");
-									testResultStyledText.append("\n"+hash+" "+file.getName());
+									testResultStyledText.append("\n"+hash+ MD5Constants.MD5_SPACER +file.getName());
 									testResultStyledText.append("\n"+hashDisplay+" MD5 Hash");
 									
 								}});
 							}
 						}
-
+						
+						display.asyncExec(
+						new Runnable() {
+						public void run(){
+							testButton.setEnabled(true);
+						}});
+						
 			    	}
 				};
 				
 				testWorker.start();
-				
 				
 			}
 		});
