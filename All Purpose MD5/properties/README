@@ -91,6 +91,9 @@ a. Calculate A MD5
 	Q. The program won’t start up.  What’s wrong?
 	A. Ensure you have the latest JRE(Java Runtime Environment 1.5 or greater) installed. If you are still having problems and you are running Windows, please contact me.
 	
+	Q. The program says it does not recognize the md5 format in the file my md5 is in.
+	A. The program looks for 2 different formats. Please email me the md5 text file and I'll see if that format should be included.
+	
 	Q. I can’t run this program on Linux/Mac?
 	A. I am yet to test this on multiple platforms.  So far, I know it works on Windows 2000/XP.
 
