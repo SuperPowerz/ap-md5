@@ -1,0 +1,105 @@
+All Purpose MD5 READ ME
+Author: Nick Powers
+Contact: powers.nick@gmail.com
+
+Contents
+1.) Introduction
+2.) How To Use This Software
+a. Calculate A MD5
+		i. A File
+	ii. A Directory
+	b. Test A MD5
+		i. 2 Files
+		ii. A File and a String
+	c. Statistics
+	d. Options
+3.) Troubleshooting
+4.) FAQ
+5.) Acknowledgements
+
+1.) Introduction
+	Welcome to the All Purpose MD5 software.  
+	This software is designed to easily, quickly and effortlessly calculate and test md5s.  
+	This simple program also calculates and keeps statistics to see just how fast it is.  
+	If you are interested in contributing to this Open Source project, please email me at powers.nick@gmail.com.
+
+2.)	How To Use This Software
+ 	Using this software is easy.  Just follow these simple instructions.
+
+	a.	Calculate A MD5
+		Click the Calculate tab.
+
+		i. 	A File
+			Start by clicking the Choose a File radio button. 
+			Click Browse. 
+			Choose a file.  
+			Click Calculate.  
+			Your result should display in the Calculate Result text box.  
+			If you would like to save the md5, click Save MD5 AS... under File, in the menu.
+	
+		ii. A Directory
+			Start by clicking the Choose a Directory radio button. 
+			Click Browse. 
+			Choose a directory. 
+			Click Calculate.  
+			Your result should display in the Calculate Result text box and be saved 
+			in your default directory as the name of the directory folder plus a md5 extension (i.e. myfolder.md5).
+
+	b.	Test A MD5
+		Click the Test tab.
+
+		i.	2 Files
+			Choose the file you want to ensure the consistency by choosing Browse by File to be Tested.  
+			Choose your file.  Then choose the md5 file by clicking Browse by MD5 File. Click Test.
+
+		ii.	A File and a String
+			Choose the file you want to ensure the consistency by choosing Browse by File to be Tested.  
+			Choose your file.  
+			Paste or type your MD5 string in the box labeled Paste or Type the MD5. 
+			Click Test.
+
+	c.	Statistics
+		Click the Statistics tab.
+		The statistics tab is used to view that statistics of all the md5 calculations.  
+		This tabs purpose is to show you how fast this program is, compared to others. 
+		If you’d prefer not to use these statistics, simple turn it off in the options.
+
+	d.	Options
+		File-->Options
+
+		All Purpose MD5 has some options that can be altered.  They are listed below, with explanations.
+	
+		-	Stats Enabled – Choose to disable stats calculations
+		-	Number of Stats Kept – Choose the number of stats listed in the Statistics tab table
+		-	Recurse Directories – Choose not to recurse directories when calculating all md5s in a directory.
+		-	Default Directory – You may change the default directory where the md5s are stored.
+		-	Reset Options – Resets the options to the defaults.
+
+3.)	Troubleshooting
+	If you are unable to launch the program, ensure you have Java 1.5 runtime installed.  You may download it from http://java.sun.com.
+
+4.) FAQ
+	Q. The program complains about a property every time it starts up.
+	A. Reset the options by choosing File-->Options-->Reset Options.  If you are unable to do that then unzip apmd5_properties.jar to the directory you installed the application.
+	
+	Q. The program seems to lock up if I calculate a big file.  What’s going on?
+	A. Big files take some time to calculate. On my machine a 800 mb file takes about 20 seconds.
+	
+	Q. The program keeps giving weird errors.
+	A. This is alpha software, it is prone to bugs.  Please email the contents of your log to powers.nick@gmail.com, subject being “All Purpose MD5 Error”.  You can get to the log by Help-->View Log. You can copy and paste it or email the actual log, located in the install directory and called APMD5.log.
+	
+	Q. The program won’t start up.  What’s wrong?
+	A. Ensure you have the latest JRE(Java Runtime Environment 1.5 or greater) installed. If you are still having problems and you are running Windows, please contact me.
+	
+	Q. The program says it does not recognize the md5 format in the file my md5 is in.
+	A. The program looks for 2 different formats. Please email me the md5 text file and I'll see if that format should be included.
+	
+	Q. I can’t run this program on Linux/Mac?
+	A. I am yet to test this on multiple platforms.  So far, I know it works on Windows 2000/XP.
+
+5.)	Acknowledgements
+	As of today, I am the only contributor/developer.  
+	I took code from 
+	http://www.twmacinta.com/myjava/fast_md5.php 
+	for the fast md5 code.
+
