@@ -43,6 +43,8 @@ public interface MD5Constants {
 	public static String TIME_FORMAT_SHORT = "ss:SS";
 	public static String TIME_FORMAT_START_END = "hh:mm:ss:SS";
 	
+	public static String MD5_SPACER = " ";
+	
 	// Other constants
 	public static String PROGRAM_NAME = "All Purpose MD5";
 	public static String AUTHORS = "Nick Powers";
