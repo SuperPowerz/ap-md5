@@ -1,5 +1,12 @@
 package md5;
 
+/*
+ * (Nick Powers)
+ * I am not the orginal author of this code (see license below).
+ * Modifications: 
+ * 	- I changed the package names, but the source is the original.
+ */
+
 /**
  * Fast implementation of RSA's MD5 hash generator in Java JDK Beta-2 or higher<br>
  * Originally written by Santeri Paavolainen, Helsinki Finland 1996 <br>

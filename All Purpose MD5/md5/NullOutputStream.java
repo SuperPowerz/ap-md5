@@ -2,6 +2,13 @@ package md5;
 
 import java.io.*;
 
+/*
+ * (Nick Powers)
+ * I am not the orginal author of this code (see license below).
+ * Modifications: 
+ * 	- I changed the package names, but the source is the original.
+ */
+
 /**
  * Copyright (c) 2001, 2002 by Pensamos Digital, All Rights Reserved.<p>
  *
