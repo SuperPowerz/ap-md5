@@ -1,5 +1,0 @@
-1.) Download a zipped distribution.
-2.) Unzip to a location (i.e. C:\).
-3.) Navigate to that location and click the apmd5.jar file.
-4.) The program should start.
-5.) No registry entries, no funny business.
