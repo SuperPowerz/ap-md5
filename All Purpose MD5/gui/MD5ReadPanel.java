@@ -61,14 +61,14 @@ public class MD5ReadPanel {
 		shell = new Shell();
 		shell.setImage(SWTResourceManager.getImage(MD5ReadPanel.class, "/images/apmd5_icon.png"));
 		shell.setLayout(new FillLayout());
-		shell.setSize(508, 479);
+		shell.setSize(766, 526);
 
 		final Composite composite = new Composite(shell, SWT.NONE);
 		composite.setLayout(new FillLayout());
 
 		readMeStyledText = new StyledText(composite, SWT.V_SCROLL | SWT.BORDER | SWT.H_SCROLL);
 		readMeStyledText.setEditable(false);
-		readMeStyledText.setFont(SWTResourceManager.getFont("Arial Unicode MS", 10, SWT.NONE));
+		readMeStyledText.setFont(SWTResourceManager.getFont("Courier New", 10, SWT.NONE));
 		//
 	}
 	
