@@ -103,7 +103,7 @@ public class MD5Options {
 	 */
 	protected void createContents() {
 		shell = new Shell();
-		shell.setImage(SWTResourceManager.getImage("images/apmd5_icon.png"));
+		shell.setImage(SWTResourceManager.getImage("images/apmd5.ico"));
 		shell.setSize(517, 418);
 		shell.setText("APMD5 Options");
 

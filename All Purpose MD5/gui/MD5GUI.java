@@ -223,7 +223,7 @@ public class MD5GUI {
 	 */
 	protected void createContents() {
 		shell = new Shell(SWT.MIN | SWT.TITLE);
-		shell.setImage(SWTResourceManager.getImage("images/apmd5_icon.png"));
+		shell.setImage(SWTResourceManager.getImage("images/apmd5.ico"));
 		shell.addDisposeListener(new DisposeListener() {
 			public void widgetDisposed(final DisposeEvent e) {
 
@@ -1071,8 +1071,11 @@ public class MD5GUI {
 			
 			if(dd.getFilterPath() != null && !dd.getFilterPath().equalsIgnoreCase("")){
 				defaultDirectory = dd.getFilterPath();
-				setSingleProperty(MD5Constants.DEFAULT_DIRECTORY, defaultDirectory);
+			} else {
+				Properties p = System.getProperties();
+				defaultDirectory = MD5Constants.HOME_DIR;
 			}
+			setSingleProperty(MD5Constants.DEFAULT_DIRECTORY, defaultDirectory);
 		}
 		
 		// Regular Expressions for getting the MD5 out of a file
