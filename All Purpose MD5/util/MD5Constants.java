@@ -24,6 +24,8 @@ package util;
 
 public interface MD5Constants {
 	
+	public static String HOME_DIR = System.getProperty("user.home");
+	
 	public static String MD5_EXT = ".md5";
 	
 	public static String PROPERTIES_FILE = "properties/APMD5.properties";
