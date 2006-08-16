@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>
+<installation version="1.0">
+    <info>
+        <appname>All Purpose MD5</appname>
+        <appversion>0.1</appversion>
+        <authors>
+            <author name="Nick Powers" email="powers.nick@gmail.com"/>
+        </authors>
+        <url>http://powers.nick.googlepages.com/home</url>
+    </info>		<guiprefs width="640" height="480" resizable="no"/>	<!-- English only -->
+    <locale>
+        <langpack iso3="eng"/>
+    </locale>
+    <resources>
+        <res id="LicencePanel.licence" src="gpl.txt"/>
+        <res id="InfoPanel.info" src="info.txt"/>
+        
+        <!-- Images -->
+        <res src="../IzPack/images/core.png" id="ImgPacksPanel.img.0" />
+        <res src="../IzPack/images/src.png" id="ImgPacksPanel.img.5" />
+        <res src="../IzPack/images/border1.png" id="Installer.image.0" />
+        <res src="../IzPack/images/border2.png" id="Installer.image.1" />
+        <res src="../IzPack/images/border3.png" id="Installer.image.2" />
+        <res src="../IzPack/images/border4.png" id="Installer.image.3" />
+        <res src="../IzPack/images/border5.png" id="Installer.image.4" />
+        <res src="../IzPack/images/border6.png" id="Installer.image.5" />
+        <res src="../IzPack/images/border7.png" id="Installer.image.5" />
+        
+        <!-- Shortcuts -->
+        <res src="../IzPack/shortcutSpec.xml" id="shortcutSpec.xml" />
+        <res src="../IzPack/Unix_shortcutSpec.xml" id="Unix_shortcutSpec.xml" />
+        
+    </resources>
+    <panels>
+        <panel classname="HelloPanel"/>
+        <panel classname="InfoPanel"/>
+        <panel classname="LicencePanel"/>
+        <panel classname="TargetPanel"/> 
+        <panel classname="PacksPanel"/>
+        <panel classname="InstallPanel"/>
+        <panel classname="ShortcutPanel"/>
+        <panel classname="SimpleFinishPanel"/>
+    </panels>	<!-- 3 Packs - Application, Documentation, Source-->
+    <packs>
+        <pack name="Application" required="yes">
+            <description>The Application</description>
+            <file src="images" targetdir="$INSTALL_PATH"/>
+            <file src="properties" targetdir="$INSTALL_PATH"/>
+            <file src="APMD5.jar" targetdir="$INSTALL_PATH"/>
+            <file src="APMD5_properties.jar" targetdir="$INSTALL_PATH"/>
+            <file src="swt.jar" targetdir="$INSTALL_PATH"/>
+            <file src="swt-awt-win32-3232.dll" targetdir="$INSTALL_PATH"/>
+            <file src="swt-gdip-win32-3232.dll" targetdir="$INSTALL_PATH"/>
+            <file src="swt-wgl-win32-3232.dll" targetdir="$INSTALL_PATH"/>
+            <file src="swt-win32-3232.dll" targetdir="$INSTALL_PATH"/>
+            
+            <file src="info.txt" targetdir="$INSTALL_PATH"/>
+            <file src="gpl.txt" targetdir="$INSTALL_PATH"/>
+        </pack>
+        <pack name="Documentation" required="no">
+            <description>The Documentation</description>
+            <file src="doc" targetdir="$INSTALL_PATH"/>
+        </pack>
+        <pack name="Source" required="no">
+            <description>The Source</description>
+            <file src="src" targetdir="$INSTALL_PATH"/>
+        </pack>
+    </packs>
+	
+	<!-- For creating shortcuts on Windows Machines -->
+	<native type="izpack" name="ShellLink.dll"/>
+	
+</installation>
