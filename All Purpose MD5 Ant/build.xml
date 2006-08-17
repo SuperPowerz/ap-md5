@@ -1,11 +1,15 @@
-<project name="APMD5" default="dist" basedir=".">
-    <description>
-        Build file to build the All Purpose MD5 Application
-    </description>
+<!-- ====================================================== -->
+<!-- = Author: Nick Powers                                = -->
+<!-- = Last Updated: 8/17/2006                            = -->
+<!-- = The default target build the APMD5 jar.            = -->
+<!-- = The generate-installer target generates the IzPack = -->
+<!-- = installer.                                         = -->
+<!-- ====================================================== -->
 
+  <project name="APMD5" default="dist" basedir=".">
+  <description>Build file to build the All Purpose MD5 Application</description>
+       
   <tstamp/>
-	
-
 	
   <!-- relative to the source directory -->
   <property name="src" location="../All Purpose MD5"/>
@@ -136,54 +140,48 @@
 <!-- =        Creates an installer for IzPack          = -->
 <!-- =  Params: installer.xmlfile, installer.name      = -->
 <!-- =================================================== -->
-	<target name="generate.installer.worker">
+  <target name="generate.installer.worker">
 	
-	    <!-- Allows us to use the IzPack Ant task -->
-		<echo message="Defining a task name using ${iz.base.dir}/lib/compiler.jar"/>
-	    <taskdef name="izpack"
-	             classpath="${iz.base.dir}/lib/compiler.jar"
-	             classname="com.izforge.izpack.ant.IzPackTask" />        
+    <!-- Allows us to use the IzPack Ant task -->
+    <echo message="Defining a task name using ${iz.base.dir}/lib/compiler.jar"/>
+    <taskdef name="izpack"
+	         classpath="${iz.base.dir}/lib/compiler.jar"
+	         classname="com.izforge.izpack.ant.IzPackTask" />        
 	
-		<!-- Call the default build -->
-		<antcall target="dist"/>
+    <!-- Call the default build -->
+    <antcall target="dist"/>
 	
-	    <!-- Call IzPack -->
-	    <echo message="Makes the installer using IzPack" level="verbose" />
-	    <izpack input="${iz.dir}\${installer.xmlfile}"
-	            output="${installer.name}${ver}.jar"
-	            installerType="standard"
-				basedir="${dist}"
-	    	    izPackDir="${iz.base.dir}"/>
-	</target>
+    <!-- Call IzPack -->
+    <echo message="Makes the installer using IzPack" level="verbose" />
+    <izpack input="${iz.dir}\${installer.xmlfile}"
+	        output="${installer.name}${ver}.jar"
+	        installerType="standard"
+			basedir="${dist}"
+	    	izPackDir="${iz.base.dir}"/>
+  </target>
 	
-	<!-- 	basedir="${iz.dir}" 
-		    compression="bzip2"
+	<!--    compression="bzip2"
 	        compressionlevel="9" 
 	-->
-
-<!--
-	<property name="installer.name" value="${program.name}-installer" />
-	<property name="iz.install.file" value="install.xml"/>
--->
 	
 <!-- =================================================== -->
 <!-- =     Creates a normal installer for IzPack       = -->
 <!-- =================================================== -->
-    <target name="generate.installer">
-        <antcall target="generate.installer.worker">
-            <param name="installer.xmlfile" value="install.xml" />
-            <param name="installer.name" value="APMD5-install-" />
-        </antcall>
-    </target>
+  <target name="generate.installer">
+    <antcall target="generate.installer.worker">
+      <param name="installer.xmlfile" value="install.xml" />
+      <param name="installer.name" value="APMD5-install-" />
+    </antcall>
+  </target>
 	
 <!-- =================================================== -->
 <!-- =   Creates an installer with registry support    = -->
 <!-- =================================================== -->
-    <target name="generate.installer-reg">
-        <antcall target="generate.installer.worker">
-            <param name="installer.xmlfile" value="install-reg.xml" />
-            <param name="installer.name" value="APMD5-install-reg-" />
-        </antcall>
-    </target>	
+  <target name="generate.installer.reg">
+    <antcall target="generate.installer.worker">
+      <param name="installer.xmlfile" value="install-reg.xml" />
+      <param name="installer.name" value="APMD5-install-reg-" />
+    </antcall>
+  </target>	
 	
 </project>
