@@ -1,1 +1,25 @@
-This is info from info.txt
+Thank You for downloading All Purpose MD5!
+
+All Purpose MD5 is a quick and easy application to calculate MD5 sums.
+
+Long have I looked for a MD5 program that is easy, intuative and most importantly, fast!
+I have seen many MD5 programs that do some of this, but many of them are closed source and
+I was always afraid of spyware or hidden code.  Thus, is born All Purpose MD5.
+
+If you have any suggestions or want to join this project, please email me at powers.nick@gmail.com.
+Also, if you find this program useful, or crappy, tell me.  I'd like to know if you get any use out of
+this program.  Additionally, if you are running a Open Source project and are looking for an experienced
+developer, send me an email.  I am always looking for more experience.
+
+All Purpose MD5 Homepage
+http://powers.nick.googlepages.com/home
+
+
+Version History (most recent at top)
+|--------------------------------------------------------------------------|
+| Version | Release Date | Changes                                         |
+|--------------------------------------------------------------------------|
+|   0.1   |  2006/08/17  |  - Initial installer version                    |         
+|         |              |	- Fixed many bugs found in testing             |
+|         |              |  - Now incrementing versions after each release |
+|---------|--------------|-------------------------------------------------|
