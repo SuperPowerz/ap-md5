@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Display;
 public class ScreenLogger {
 
 	private StyledText logObject = null;
+	private Display display = null;
 	
 	private static final String WARNING = "WARNING: ";
 	private static final String ERROR = "ERROR: ";
@@ -44,65 +45,122 @@ public class ScreenLogger {
 		logObject = textBox;
 	}
 	
-	public void log(String message){
+	public ScreenLogger(StyledText textBox, Display display){
+		logObject = textBox;
+		this.display = display;
+	}
+	
+	public void log(final String message){
 		if(message == null){
 			return;
 		}
-		
-		logObject.setText(message);
+		if(display == null){
+			logObject.setText(message);
+		} else {
+			// use this to change gui without thread access violation
+			display.asyncExec(
+			new Runnable() {
+			public void run(){
+				logObject.setText(message);
+			}});
+		}
 	}
 	
-	public void log(String message, String color){
+	public void log(final String message, final String color){
 		if(message == null || color == null){
 			return;
 		}
 		
-		logObject.setText(message);
-		logObject.setStyleRange(new StyleRange(0, message.length(), getColor(color), getColor(BACKGROUND_COLOR), SWT.NONE));
+		if(display == null){
+			logObject.setText(message);
+			logObject.setStyleRange(new StyleRange(0, message.length(), getColor(color), getColor(BACKGROUND_COLOR), SWT.NONE));
+		} else {
+			display.asyncExec(
+			new Runnable() {
+			public void run(){
+				logObject.setText(message);
+				logObject.setStyleRange(new StyleRange(0, message.length(), getColor(color), getColor(BACKGROUND_COLOR), SWT.NONE));		
+			}});
+		}
 	}
 	
-	public void log(String message, String color, int fontStyle){
+	public void log(final String message, final String color, final int fontStyle){
 		if(message == null || color == null){
 			return;
 		}
 		
-		logObject.setText(message);
-		logObject.setStyleRange(new StyleRange(0, message.length(), getColor(color), getColor(BACKGROUND_COLOR), fontStyle));
+		if(display == null){
+			logObject.setText(message);
+			logObject.setStyleRange(new StyleRange(0, message.length(), getColor(color), getColor(BACKGROUND_COLOR), fontStyle));
+		} else {
+			display.asyncExec(
+			new Runnable() {
+			public void run(){
+				logObject.setText(message);
+				logObject.setStyleRange(new StyleRange(0, message.length(), getColor(color), getColor(BACKGROUND_COLOR), fontStyle));
+			}});
+		}
 	}
 	
-	public void logAppend(String message){
+	public void logAppend(final String message){
 		if(message == null){
 			return;
 		}
-		
-		logObject.append(message);
+		if(display == null){
+			logObject.append(message);
+		} else {
+			display.asyncExec(
+			new Runnable() {
+			public void run(){
+				logObject.append(message);
+			}});
+		}
 	}
 	
-	public void logAppend(String message, String color){
+	public void logAppend(final String message, final String color){
 		if(message == null || color == null){
 			return;
 		}
 		
-		int length = message.length() + logObject.getText().length();
-		logObject.append(message);
-		logObject.setStyleRange(new StyleRange(0, length, getColor(color), getColor(BACKGROUND_COLOR), SWT.NONE));
+		if(display == null){
+			int length = message.length() + logObject.getText().length();
+			logObject.append(message);
+			logObject.setStyleRange(new StyleRange(0, length, getColor(color), getColor(BACKGROUND_COLOR), SWT.NONE));
+		} else {
+			display.asyncExec(
+			new Runnable() {
+			public void run(){
+				int length = message.length() + logObject.getText().length();
+				logObject.append(message);
+				logObject.setStyleRange(new StyleRange(0, length, getColor(color), getColor(BACKGROUND_COLOR), SWT.NONE));
+			}});
+		}
 	}
 	
-	public void logAppend(String message, String color, int fontStyle){
+	public void logAppend(final String message, final String color, final int fontStyle){
 		if(message == null || color == null){
 			return;
 		}
 		
-		int length = message.length() + logObject.getText().length();
-		logObject.append(message);
-		logObject.setStyleRange(new StyleRange(0, length, getColor(color), getColor(BACKGROUND_COLOR), fontStyle));
+		if(display == null){
+			int length = message.length() + logObject.getText().length();
+			logObject.append(message);
+			logObject.setStyleRange(new StyleRange(0, length, getColor(color), getColor(BACKGROUND_COLOR), fontStyle));
+		} else {
+			display.asyncExec(
+			new Runnable() {
+			public void run(){
+				int length = message.length() + logObject.getText().length();
+				logObject.append(message);
+				logObject.setStyleRange(new StyleRange(0, length, getColor(color), getColor(BACKGROUND_COLOR), fontStyle));
+			}});
+		}
 	}
 	
 	public void logWarn(String message){
 		if(message == null ){
 			return;
 		}
-		
 		log(WARNING+message, WARNING_COLOR);
 	}
 	
@@ -115,10 +173,18 @@ public class ScreenLogger {
 	}
 	
 	public void clear(){
-		logObject.setText("");
+		if(display == null){
+			logObject.setText("");
+		} else {
+			display.asyncExec(
+			new Runnable() {
+			public void run(){
+				logObject.setText("");
+			}});
+		}
 	}
 	
-	private Color getColor(String color){
+	public Color getColor(String color){
 		if(color == null){
 			return Display.getCurrent().getSystemColor(SWT.COLOR_BLACK);
 		}
