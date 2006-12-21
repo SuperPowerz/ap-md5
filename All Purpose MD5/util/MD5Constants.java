@@ -36,18 +36,6 @@ public interface MD5Constants {
 	public static String LOG_FILE_NAME = "APMD5.log";
 	
 	public static String RECURSE_DIRECTORY = "recurse.directory";
-	
-	public static String BACKGROUND_COLOR_R = "background.color.r";
-	public static String BACKGROUND_COLOR_G = "background.color.g";
-	public static String BACKGROUND_COLOR_B = "background.color.b";
-	
-	public static String FOREGROUND_COLOR_R = "foreground.color.r";
-	public static String FOREGROUND_COLOR_G = "foreground.color.g";
-	public static String FOREGROUND_COLOR_B = "foreground.color.b";
-	
-	public static String TEXT_COLOR_R = "text.color.r";
-	public static String TEXT_COLOR_G = "text.color.g";
-	public static String TEXT_COLOR_B = "text.color.b";
 
 	public static String STATS_ON = "stats.on";
 	public static String STATS_NUMBER_KEPT = "stats.number.kept";
@@ -72,7 +60,7 @@ public interface MD5Constants {
 	// Other constants
 	public static String PROGRAM_NAME = "All Purpose MD5";
 	public static String AUTHORS = "Nick Powers";
-	public static String VERSION = "0.1";
+	public static String VERSION = "1.0";
 	public static String WEBSITE = "http://powers.nick.googlepages.com/home";
 	
 }
