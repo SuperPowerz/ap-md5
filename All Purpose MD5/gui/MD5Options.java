@@ -34,15 +34,11 @@ import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.ColorDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
@@ -55,8 +51,6 @@ import com.swtdesigner.SWTResourceManager;
 public class MD5Options {
 
 	private StyledText defaultDirectoryStyledText;
-	private CLabel textLabel;
-	private CLabel foregroundLabel;
 	private Text statsKeptText;
 	protected Shell shell;
 	private Display display = null;
@@ -65,8 +59,6 @@ public class MD5Options {
 	private FileLogger fLogger = null;
 	
 	// Widgets
-	private CLabel backgroundLabel = null;
-	private Button foregroundButton = null;
 	private Button statsEnabledButton = null;
 	private Button recurseDirectoriesButton = null;
 	private Button browseButton = null;
@@ -104,75 +96,16 @@ public class MD5Options {
 	protected void createContents() {
 		shell = new Shell();
 		shell.setImage(SWTResourceManager.getImage("images/apmd5.ico"));
-		shell.setSize(517, 418);
+		shell.setSize(517, 332);
 		shell.setText("APMD5 Options");
 
 		final Composite composite = new Composite(shell, SWT.NONE);
-		composite.setBounds(0, 0, 509, 384);
-
-		final Group colorGroup = new Group(composite, SWT.NONE);
-		colorGroup.setText("Color");
-		colorGroup.setBounds(15, 25, 210, 146);
-
-		final Button backgroundButton = new Button(colorGroup, SWT.NONE);
-		backgroundButton.addMouseListener(new MouseAdapter() {
-			public void mouseUp(final MouseEvent e) {
-				ColorDialog cd = new ColorDialog(shell);
-				cd.open();
-				if(cd.getRGB() != null){
-					backgroundLabel.setBackground(new Color(Display.getDefault(), cd.getRGB()));
-				}
-			}
-		});
-		backgroundButton.setText("Background");
-		backgroundButton.setBounds(15, 25, 80, 20);
-
-		final Button textButton = new Button(colorGroup, SWT.NONE);
-		textButton.addMouseListener(new MouseAdapter() {
-			public void mouseUp(final MouseEvent e) {
-				ColorDialog cd = new ColorDialog(shell);
-				cd.open();
-
-				if(cd.getRGB() != null){
-					textLabel.setBackground(new Color(Display.getDefault(), cd.getRGB()));
-				}
-			}
-		});
-		textButton.setBounds(15, 92, 80, 20);
-		textButton.setText("Text");
-
-		backgroundLabel = new CLabel(colorGroup, SWT.BORDER);
-		backgroundLabel.setBackground(SWTResourceManager.getColor(234, 234, 234));
-		backgroundLabel.setBounds(115, 25, 25, 20);
-
-		foregroundButton = new Button(colorGroup, SWT.NONE);
-		foregroundButton.addMouseListener(new MouseAdapter() {
-			public void mouseUp(final MouseEvent e) {
-				ColorDialog cd = new ColorDialog(shell);
-				cd.open();
-				if(cd.getRGB() != null){
-					foregroundLabel.setBackground(new Color(Display.getDefault(), cd.getRGB()));
-				}
-			}
-		});
-		foregroundButton.setBounds(15, 58, 80, 20);
-		foregroundButton.setText("Foreground");
-
-		foregroundLabel = new CLabel(colorGroup, SWT.BORDER);
-		foregroundLabel.setBounds(115, 58, 25, 20);
-		foregroundLabel.setBackground(SWTResourceManager.getColor(234, 234, 234));
-
-		textLabel = new CLabel(colorGroup, SWT.BORDER);
-		textLabel.setBounds(115, 92, 25, 20);
-		textLabel.setBackground(SWTResourceManager.getColor(234, 234, 234));
-
-		final Label notCurrentlyLabel = new Label(colorGroup, SWT.NONE);
-		notCurrentlyLabel.setText("** not currently supported");
-		notCurrentlyLabel.setBounds(10, 123, 140, 18);
-
+		composite.setBounds(0, 0, 509, 305);
+		//composite.setBounds(location.x, location.y, WIDTH, HEIGHT);
+		
 		final Group statisticsGroup = new Group(composite, SWT.NONE);
 		statisticsGroup.setText("Statistics");
-		statisticsGroup.setBounds(15, 177, 210, 91);
+		statisticsGroup.setBounds(10, 25, 210, 91);
 
 		statsEnabledButton = new Button(statisticsGroup, SWT.CHECK);
 		statsEnabledButton.setText("Stats Enabled");
@@ -210,18 +143,6 @@ public class MD5Options {
 					fLogger.log("Exception Message: " + e1.getMessage());
 				}
 				
-				props.setProperty(MD5Constants.BACKGROUND_COLOR_R, Integer.toString(backgroundLabel.getBackground().getRed()));
-				props.setProperty(MD5Constants.BACKGROUND_COLOR_G, Integer.toString(backgroundLabel.getBackground().getGreen()));
-				props.setProperty(MD5Constants.BACKGROUND_COLOR_B, Integer.toString(backgroundLabel.getBackground().getBlue()));
-				
-				props.setProperty(MD5Constants.FOREGROUND_COLOR_R, Integer.toString(foregroundLabel.getBackground().getRed()));
-				props.setProperty(MD5Constants.FOREGROUND_COLOR_G, Integer.toString(foregroundLabel.getBackground().getGreen()));
-				props.setProperty(MD5Constants.FOREGROUND_COLOR_B, Integer.toString(foregroundLabel.getBackground().getBlue()));
-				
-				props.setProperty(MD5Constants.TEXT_COLOR_R, Integer.toString(textLabel.getBackground().getRed()));
-				props.setProperty(MD5Constants.TEXT_COLOR_G, Integer.toString(textLabel.getBackground().getGreen()));
-				props.setProperty(MD5Constants.TEXT_COLOR_B, Integer.toString(textLabel.getBackground().getBlue()));
-				
 				props.setProperty(MD5Constants.STATS_ON, Boolean.toString(statsEnabledButton.getSelection()));
 				props.setProperty(MD5Constants.STATS_NUMBER_KEPT, statsKeptText.getText());
 				
@@ -247,7 +168,7 @@ public class MD5Options {
 			}
 		});
 		saveOptionsButton.setText("Save Options");
-		saveOptionsButton.setBounds(148, 335, 84, 25);
+		saveOptionsButton.setBounds(136, 269, 84, 25);
 
 		final Button discardOptionsButton = new Button(composite, SWT.NONE);
 		discardOptionsButton.addMouseListener(new MouseAdapter() {
@@ -256,7 +177,7 @@ public class MD5Options {
 				shell.dispose();
 			}
 		});
-		discardOptionsButton.setBounds(265, 335, 84, 25);
+		discardOptionsButton.setBounds(240, 269, 84, 25);
 		discardOptionsButton.setText("Discard Options");
 
 		final Button resetOptionsButton = new Button(composite, SWT.NONE);
@@ -300,12 +221,12 @@ public class MD5Options {
 
 			}
 		});
-		resetOptionsButton.setBounds(10, 274, 84, 25);
+		resetOptionsButton.setBounds(136, 122, 84, 25);
 		resetOptionsButton.setText("Reset Options");
 
 		final Group miscGroup = new Group(composite, SWT.NONE);
 		miscGroup.setText("Misc");
-		miscGroup.setBounds(240, 25, 259, 184);
+		miscGroup.setBounds(240, 25, 259, 205);
 
 		recurseDirectoriesButton = new Button(miscGroup, SWT.CHECK);
 		recurseDirectoriesButton.setText("Recurse Directories");
@@ -313,11 +234,11 @@ public class MD5Options {
 
 		defaultDirectoryStyledText = new StyledText(miscGroup, SWT.BORDER);
 		defaultDirectoryStyledText.setWordWrap(true);
-		defaultDirectoryStyledText.setBounds(10, 127, 239, 45);
+		defaultDirectoryStyledText.setBounds(10, 137, 239, 45);
 
 		final CLabel defaultDirectoryLabel = new CLabel(miscGroup, SWT.NONE);
 		defaultDirectoryLabel.setText("Default Directory");
-		defaultDirectoryLabel.setBounds(10, 77, 89, 22);
+		defaultDirectoryLabel.setBounds(10, 83, 89, 22);
 
 		browseButton = new Button(miscGroup, SWT.NONE);
 		browseButton.addMouseListener(new MouseAdapter() {
@@ -333,7 +254,7 @@ public class MD5Options {
 			}
 		});
 		browseButton.setText("Browse");
-		browseButton.setBounds(10, 101, 65, 20);
+		browseButton.setBounds(10, 111, 65, 20);
 		//
 	}
 
@@ -355,25 +276,6 @@ public class MD5Options {
 			fLogger.log("Exception Message: " + e1.getMessage());
 			return;
 		}
-		
-		int br = Integer.parseInt(props.getProperty(MD5Constants.BACKGROUND_COLOR_R));
-		int bg = Integer.parseInt(props.getProperty(MD5Constants.BACKGROUND_COLOR_G));
-		int bb = Integer.parseInt(props.getProperty(MD5Constants.BACKGROUND_COLOR_B));
-		
-		backgroundLabel.setBackground(new Color(Display.getDefault(), new RGB(br, bg, bb)));
-		
-		int fr = Integer.parseInt(props.getProperty(MD5Constants.FOREGROUND_COLOR_R));
-		int fg = Integer.parseInt(props.getProperty(MD5Constants.FOREGROUND_COLOR_G));
-		int fb = Integer.parseInt(props.getProperty(MD5Constants.FOREGROUND_COLOR_B));
-		
-		foregroundLabel.setBackground(new Color(Display.getDefault(), new RGB(fr, fg, fb)));
-		
-		int tr = Integer.parseInt(props.getProperty(MD5Constants.TEXT_COLOR_R));
-		int tg = Integer.parseInt(props.getProperty(MD5Constants.TEXT_COLOR_G));
-		int tb = Integer.parseInt(props.getProperty(MD5Constants.TEXT_COLOR_B));
-		
-		textLabel.setBackground(new Color(Display.getDefault(), new RGB(tr, tg, tb)));
-
 		
 		statsEnabledButton.setSelection(("true").equalsIgnoreCase(props.getProperty(MD5Constants.STATS_ON)));
 		statsKeptText.setText(props.getProperty(MD5Constants.STATS_NUMBER_KEPT));

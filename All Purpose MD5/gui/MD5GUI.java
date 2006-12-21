@@ -21,7 +21,6 @@ or go to http://www.gnu.org/licenses/gpl.html.
 */
 
 package gui;
-
 import exceptions.CanNotWriteToFileException;
 import exceptions.InvalidPropertyException;
 
@@ -52,9 +51,7 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
@@ -64,6 +61,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
@@ -92,6 +90,9 @@ public class MD5GUI {
 	private ScreenLogger sLogger = null;
 	private FileLogger fLogger = null;
 	
+	// Progress Bar
+	private static ProgressBar progressBar = null;
+	
 	// Widgets
 	private StyledText messageStyledText = null;
 	private StyledText calculateBrowseStyledText = null;
@@ -111,25 +112,10 @@ public class MD5GUI {
 	private TableColumn timeStoppedColumn = null;
 	private Group calculateInputGroup = null;
 	private Button calculateButton = null;
-	
+	private Button testButton = null;
 	// Options
 	public static boolean recurseDirectory = false;
 	
-	public static Color backgroundColor = null;
-	public static int backgroundColorR;
-	public static int backgroundColorG;
-	public static int backgroundColorB;
-	
-	public static Color foregroundColor = null;
-	public static int foregroundColorR;
-	public static int foregroundColorG;
-	public static int foregroundColorB;
-	
-	public static Color textColor = null;
-	public static int textColorR;
-	public static int textColorG;
-	public static int textColorB;
-
 	public static boolean enableStats = false;
 	public static int numberOfStatsKept = 0;
 	
@@ -235,30 +221,28 @@ public class MD5GUI {
 		});
 		
 		shell.setMinimumSize(new Point(0, 0));
-		//shell.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
-		shell.setBackground(backgroundColor);
 		shell.setSize(551, 576);
 		shell.setText("All Purpose MD5");
 
 		final TabFolder tabFolder = new TabFolder(shell, SWT.NONE);
 		tabFolder.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
-		//tabFolder.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
-		tabFolder.setBackground(backgroundColor);
 		tabFolder.setBounds(0, 0, 545, 507);
 
+		// Set the test tab before the calculate tab
+		final TabItem testTabItem = new TabItem(tabFolder, SWT.NONE);
+		testTabItem.setToolTipText("Test a file for integrity");
+		testTabItem.setText("Test");
+		
 		final TabItem calculateTabItem = new TabItem(tabFolder, SWT.NONE);
 		calculateTabItem.setToolTipText("Calculate a MD5 Sum");
 		calculateTabItem.setText("Calculate");
 
 		final Composite composite = new Composite(tabFolder, SWT.NONE);
-		composite.setBackground(backgroundColor);
 		composite.setFont(SWTResourceManager.getFont("Arial Unicode MS", 10, SWT.NONE));
-		composite.setForeground(foregroundColor);
 		composite.setLocation(4, 24);
 		calculateTabItem.setControl(composite);
 
 		final CLabel calculateAMd5Label = new CLabel(composite, SWT.NONE);
-		calculateAMd5Label.setBackground(backgroundColor);
 		calculateAMd5Label.setFont(SWTResourceManager.getFont("Arial Unicode MS", 16, SWT.NONE));
 		calculateAMd5Label.setText("Calculate A MD5 Sum");
 		calculateAMd5Label.setBounds(157, 10, 249, 30);
@@ -271,164 +255,15 @@ public class MD5GUI {
 		calculateButton.addMouseListener(new MouseAdapter() {
 			public void mouseUp(final MouseEvent e) {
 // #######################################  Calculate Button Mouse UP #########################################
+				setButtonEnabled(display, calculateButton, false);
+				setProgressEnabled(display, progressBar, true);
 				
-				final MD5Functions md5Functions = new MD5Functions(sLogger, fLogger, display, caculateResultStyledText);
-				final String filename = calculateBrowseStyledText.getText().trim();
-	        	final String string = calculateStringStyledText.getText().trim();
-	        	
-	        	calculateButton.setEnabled(false);
-	        	
-			    final Thread worker = new Thread() {
-			    	public void run() {
-
-			        	final boolean hasFile = !(filename == null || filename.equalsIgnoreCase(""));
-			        	final boolean hasString = !(string == null || string.equalsIgnoreCase(""));
-			        	boolean isDirectory = false;
-			        	final long timeAtStart = System.currentTimeMillis();
-			        	
-			        	// Check both fields, if empty, log msg to screen
-			        	if(!hasFile && !hasString){
-			        		sLogger.logWarn("No file, directory or String is specified. Please choose a file, directory or enter a String");
-			        		setButtonEnabled(display,calculateButton,true);
-			        		
-			        		return;
-			        	}
-			        	
-			        	
-			        	if(hasFile){
-			        		
-			        		final File file = new File(filename);
-			        		// check if file exists
-			        		if(!file.exists()){
-			        			sLogger.logError("File does not exist! Not calculating MD5");
-			        			setButtonEnabled(display,calculateButton,true);
-				        		
-				        		return;
-			        		}
-			        		
-			        		sLogger.log("Calculating MD5 for file " + file.getName() + "...");
-
-				        	isDirectory = file.isDirectory();
-				        	
-				        	if(isDirectory){
-				        		// Calculate for all files in this directory
-				        		final String md5File = defaultDirectory+"\\"+ file.getName() + MD5Constants.MD5_EXT;
-				        		
-				        		if(SimpleIO.exists(md5File)){
-					        		display.syncExec(
-				        			new Runnable() {
-				        			public void run(){
-				        				msgBoxBool = false;
-										MessageBox mb = new MessageBox(shell, SWT.YES | SWT.NO);
-										mb.setText("File Already Exists");	
-										mb.setMessage("File " + md5File + " already exists\n Overwrite?");
-										if(mb.open() == SWT.NO){
-								        	sLogger.logWarn("Chose not to overwrite the file. Did not create MD5(s)");
-								        	msgBoxBool = true;
-										}
-						        	}});
-									
-					        		if(msgBoxBool){
-					        			setButtonEnabled(display,calculateButton,true);	
-					        			return;
-					        		}
-				        		}
-				        		
-				        		PrintWriter pw = null;
-				        		try {
-				        			pw = SimpleIO.openFileForOutput(md5File);
-				        		} catch (CanNotWriteToFileException e){
-				        			sLogger.logError("Can not write to file " + md5File +". Did not create MD5(s)");
-				        			setButtonEnabled(display,calculateButton,true);
-			        			
-				        			return;
-				        		}
-				        		
-				        		setStyledText(display,caculateResultStyledText,"",false);
-				        		
-				        		// recurse directories or not?
-				        		if(recurseDirectory){
-				        			md5Functions.recurseDirectory(file, pw);
-				        		} else {
-				        			md5Functions.singleDirectory(file, pw);
-				        		}
-				        		
-				        	
-		        				long currentTime = System.currentTimeMillis();
-								String timeElapsed = getTime(timeAtStart, currentTime, MD5Constants.TIME_FORMAT_SHORT);
-								String startTime = getTime(0, timeAtStart, MD5Constants.TIME_FORMAT_START_END);
-								String endTime = getTime(0, currentTime, MD5Constants.TIME_FORMAT_START_END);
-								
-								addTableItem(file.getName(), timeElapsed, startTime, endTime, 0);
-								
-		        				sLogger.log("File Hash(s) created in file " + md5File + ". " + timeElapsed + " seconds");
-		        				setButtonEnabled(display,calculateButton,true);	
-				        		
-				        		// close the file
-				        		if(pw != null){
-				        			pw.close();
-				        		}
-				        		
-				        	} else {
-				        		
-				        		final String hash = md5Functions.calculateMd5(file);
-				        		
-								if(hash == null){
-									sLogger.logError("Failed to create hash for file " + file.getName());
-									setButtonEnabled(display,calculateButton,true);
-									return;
-								}
-								
-		        				long currentTime = System.currentTimeMillis();
-								String timeElapsed = getTime(timeAtStart, currentTime, MD5Constants.TIME_FORMAT_SHORT);
-								String startTime = getTime(0, timeAtStart, MD5Constants.TIME_FORMAT_START_END);
-								String endTime = getTime(0, currentTime, MD5Constants.TIME_FORMAT_START_END);
-								
-								setStyledText(display,caculateResultStyledText,hash+MD5Constants.MD5_SPACER +file.getName(),false);
-								
-								addTableItem(file.getName(), timeElapsed, startTime, endTime, 0);
-								
-								sLogger.log("File Hash created. " + timeElapsed + " seconds");
-								setButtonEnabled(display,calculateButton,true);																		
-				        	}
-			        	}// end if(hasFile)
-			        	
-			        	if(hasString){
-			        		final String hash = md5Functions.calculateMd5(string);			        		
-	        				
-			        		sLogger.log("Calculating MD5 for string " + string + "...");
-
-			        		if(hash == null){
-			        			sLogger.logError("Failed to create hash for string " + string);
-			        			setButtonEnabled(display,calculateButton,true);
-			        			return;
-			        		}
-			        		
-	        				long currentTime = System.currentTimeMillis();
-							String timeElapsed = getTime(timeAtStart, currentTime, MD5Constants.TIME_FORMAT_SHORT);
-							String startTime = getTime(0, timeAtStart, MD5Constants.TIME_FORMAT_START_END);
-							String endTime = getTime(0, currentTime, MD5Constants.TIME_FORMAT_START_END);
-							
-			        		if(hasFile){
-			        			setStyledText(display,caculateResultStyledText,"\n"+hash+ MD5Constants.MD5_SPACER +string,true);
-			        		} else {
-			        			setStyledText(display,caculateResultStyledText,hash+ MD5Constants.MD5_SPACER +string,false);
-			        		}
-							
-							addTableItem(string, timeElapsed, startTime, endTime, 0);
-							
-			        		sLogger.log("Hash(s) created. " + timeElapsed + " seconds");	
-			        		
-			        		setButtonEnabled(display,calculateButton,true);	
-	        				
-			        	}// end if hasString	
-			        }// end run()	
-			    };
-			    
-			    worker.start();
-			    
-			}
-		});
+				calculateMouseEvent();
+				
+				setButtonEnabled(display, calculateButton, true);
+				setProgressEnabled(display, progressBar, false);
+ 
+		}});
 		calculateButton.setBounds(175, 214,115, 25);
 		calculateButton.setText("Calculate");
 
@@ -495,9 +330,7 @@ public class MD5GUI {
 		caculateResultStyledText = new StyledText(calculateOutputGroup, SWT.V_SCROLL | SWT.BORDER);
 		caculateResultStyledText.setBounds(25, 22,418, 103);
 
-		final TabItem testTabItem = new TabItem(tabFolder, SWT.NONE);
-		testTabItem.setToolTipText("Test a file for integrity");
-		testTabItem.setText("Test");
+		
 
 		final Composite composite_1 = new Composite(tabFolder, SWT.NONE);
 		testTabItem.setControl(composite_1);
@@ -569,142 +402,19 @@ public class MD5GUI {
 		browseToALabel_4_1_1.setFont(SWTResourceManager.getFont("Arial Unicode MS", 10, SWT.NONE));
 		browseToALabel_4_1_1.setText("Or, Paste or type the MD5");
 
-		final Button testButton = new Button(testInputGroup, SWT.NONE);
+		testButton = new Button(testInputGroup, SWT.NONE);
 		testButton.addMouseListener(new MouseAdapter() {
 			public void mouseUp(final MouseEvent e) {
 // #######################################  Test Button Mouse UP #########################################
-				final MD5Functions md5Functions = new MD5Functions(sLogger, fLogger, display);
-				final String md5Filename = testMd5FileStyledText.getText().trim();
-				final boolean hasFile = !testFileToBeTestedStyledText.getText().equalsIgnoreCase("");
-				final boolean hasMd5File = !md5Filename.equalsIgnoreCase("");
-				final boolean hasMd5String = !testPasteTypeMd5styledText.getText().equalsIgnoreCase("");
-
-				if(!hasFile){
-        			sLogger.logWarn("No file specified to test");
-					return;
-				}
+				setButtonEnabled(display, testButton, false);
+				setProgressEnabled(display, progressBar, true);
+			
+				testMouseButtonEvent();
 				
-				if(!hasMd5File && !hasMd5String){	
-        			sLogger.logWarn("No MD5 specified to test the file");
-					return;
-				}
-				
-				final String filename = testFileToBeTestedStyledText.getText().trim();
-				final String md5String = testPasteTypeMd5styledText.getText().trim();
-				
-				testButton.setEnabled(false);
-				
-				final Thread testWorker = new Thread() {
-			    	public void run() {
-			    		final long timeAtStart = System.currentTimeMillis();
-			    		String hash2 = null;
-			    		
-			    		// calculate MD5 for file
-			    		final File file = new File(filename);
-		        		if(!file.exists()){
-							sLogger.logError("Unable to open file " + file.getName());
-							setButtonEnabled(display, testButton, true);
-							return;
-						}
-		        		
-						sLogger.log("Testing...");
-
-		        		final String hash = md5Functions.calculateMd5(file);
-
-						if(hash == null){
-							sLogger.logError("Failed to create hash for file " + filename);
-							setButtonEnabled(display, testButton, true);
-							return;
-						}
-											
-						if(hasMd5String){
-							hash2 = md5String;
+				setButtonEnabled(display, testButton, true);
+				setProgressEnabled(display, progressBar, false);
 							
-						} else { //if(hasMd5File)
-							BufferedReader br = SimpleIO.openFileForInput(md5Filename);
-							String line = null;
-							Pattern pattern = null;
-							Matcher matcher = null;
-							
-							if(br != null){
-							
-								try {
-									while((line = br.readLine()) != null){
-										for(String regex : regExPatterns){
-											if(regex != null){
-												pattern = Pattern.compile(regex);
-												matcher = pattern.matcher(line);
-												
-												if(matcher.matches()){
-													hash2 = matcher.group(1);
-													break;
-												}
-											}
-										}// end for
-										
-									}// end while
-									
-									final String hashFromFile = hash2;
-									
-									if(hashFromFile == null){
-										StringBuffer sb = new StringBuffer();
-										sb.append("The has file does not match the standard format.\n");
-										sb.append("The standard format is as follows:\n");
-										sb.append("32 characters plus optional characters");
-										sb.append("\n");
-										sb.append("Please be sure your MD5 file is properly formatted");
-										
-										displayMsgBox(display,shell,SWT.OK|SWT.ICON_WARNING,"MD5 File Format Problem",
-												      sb.toString());
-										
-									}
-									
-								} catch (final IOException e) {
-									sLogger.logError("Unable to open MD5 file.  See log file for more info.");
-									fLogger.log("Unable to open MD5 file. Error Message: " + e.getMessage());
-								}
-							} else { // br is null (can't open file)
-									sLogger.logError("Unable to open file " + md5Filename);
-							}
-										
-						}// end else
-						
-						final String hashDisplay = hash2;
-						long currentTime = System.currentTimeMillis();
-						final String timeElapsed = getTime(timeAtStart, currentTime, MD5Constants.TIME_FORMAT_SHORT);
-						final String startTime = getTime(0, timeAtStart, MD5Constants.TIME_FORMAT_START_END);
-						final String endTime = getTime(0, currentTime, MD5Constants.TIME_FORMAT_START_END);
-						
-							
-						if(hash2 != null) {
-									
-							if(StringUtil.equalIgnoreCase(hash, hash2)){
-	
-								addTableItem(file.getName(), timeElapsed, startTime, endTime, 0);
-															
-								sLogger.log("File and MD5 hash are equal! " + timeElapsed + " seconds","dark-green");
-								setStyledText(display,testResultStyledText,"Hashs are equal!",false);
-								setStyledText(display,testResultStyledText,"\n"+hash+ MD5Constants.MD5_SPACER +file.getName(),true);
-								setStyledText(display,testResultStyledText,"\n"+hashDisplay+" MD5 Hash",true);								
-								
-							} else {									
-								sLogger.log("File and MD5 hash are NOT equal! " + timeElapsed + " seconds", "red");
-								setStyledText(display,testResultStyledText,"Hashs are NOT equal!",false);
-								setStyledText(display,testResultStyledText,"\n"+hash+ MD5Constants.MD5_SPACER +file.getName(),true);
-								setStyledText(display,testResultStyledText,"\n"+hashDisplay+" MD5 Hash",true);
-								
-							}
-						}
-						
-						setButtonEnabled(display, testButton, true);
-						
-			    	}
-				};
-				
-				testWorker.start();
-				
-			}
-		});
+			}});
 		testButton.setBounds(165, 228,115, 25);
 		testButton.setText("Test");
 
@@ -813,7 +523,7 @@ public class MD5GUI {
 		final MenuItem optionsMenuItem = new MenuItem(menu_1, SWT.NONE);
 		optionsMenuItem.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(final SelectionEvent e) {
-				MD5Options optionsWidget = new MD5Options(sLogger, fLogger);
+				MD5Options optionsWidget = new MD5Options(sLogger, fLogger);		
 				optionsWidget.open();
 			}
 		});
@@ -879,8 +589,14 @@ public class MD5GUI {
 
 		messageStyledText = new StyledText(shell, SWT.BORDER);
 		messageStyledText.setEditable(false);
-		messageStyledText.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
-		messageStyledText.setBounds(0, 506, 545, 20);
+		//messageStyledText.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+		messageStyledText.setBounds(0, 506, 466, 20);
+
+		// Progress Bar
+		progressBar = new ProgressBar(shell, SWT.NONE | SWT.INDETERMINATE);
+		progressBar.setBounds(470, 510, 70, 15);
+		progressBar.setVisible(false);
+		
 	}
 	
 	public void getAndSetProperties() throws InvalidPropertyException {
@@ -906,52 +622,6 @@ public class MD5GUI {
 		prop = properties.getProperty(MD5Constants.RECURSE_DIRECTORY);
 		checkProperty(prop, MD5Constants.RECURSE_DIRECTORY);
 		recurseDirectory = prop.equalsIgnoreCase("true");
-		
-		// Background Color R
-		prop = properties.getProperty(MD5Constants.BACKGROUND_COLOR_R);
-		checkProperty(prop, MD5Constants.BACKGROUND_COLOR_R);
-		backgroundColorR = Integer.parseInt(prop);
-		
-		//Background Color G
-		prop = properties.getProperty(MD5Constants.BACKGROUND_COLOR_G);
-		checkProperty(prop, MD5Constants.BACKGROUND_COLOR_G);
-		backgroundColorG = Integer.parseInt(prop);
-		
-		// Background Color B
-		prop = properties.getProperty(MD5Constants.BACKGROUND_COLOR_B);
-		checkProperty(prop, MD5Constants.BACKGROUND_COLOR_B);
-		backgroundColorB = Integer.parseInt(prop);
-		
-		// Foreground Color R
-		prop = properties.getProperty(MD5Constants.FOREGROUND_COLOR_R);
-		checkProperty(prop, MD5Constants.FOREGROUND_COLOR_R);
-		foregroundColorR = Integer.parseInt(prop);
-		
-		// Foreground Color G
-		prop = properties.getProperty(MD5Constants.FOREGROUND_COLOR_G);
-		checkProperty(prop, MD5Constants.FOREGROUND_COLOR_G);
-		foregroundColorG = Integer.parseInt(prop);
-		
-		// Foreground Color B
-		prop = properties.getProperty(MD5Constants.FOREGROUND_COLOR_B);
-		checkProperty(prop, MD5Constants.FOREGROUND_COLOR_B);
-		foregroundColorB = Integer.parseInt(prop);
-
-		// Text Color R
-		prop = properties.getProperty(MD5Constants.TEXT_COLOR_R);
-		checkProperty(prop, MD5Constants.TEXT_COLOR_R);
-		textColorR = Integer.parseInt(prop);
-		
-		// Text Color G
-		prop = properties.getProperty(MD5Constants.TEXT_COLOR_G);
-		checkProperty(prop, MD5Constants.TEXT_COLOR_G);
-		textColorG = Integer.parseInt(prop);
-		
-		// Text Color B
-		prop = properties.getProperty(MD5Constants.TEXT_COLOR_B);
-		checkProperty(prop, MD5Constants.TEXT_COLOR_B);
-		textColorB = Integer.parseInt(prop);
-
 		
 		// Enable Stats?
 		prop = properties.getProperty(MD5Constants.STATS_ON);
@@ -987,11 +657,6 @@ public class MD5GUI {
 		while(st.hasMoreTokens()){
 			regExPatterns.add(st.nextToken());
 		}
-
-		backgroundColor = new Color(Display.getDefault(), new RGB(backgroundColorR, backgroundColorG, backgroundColorB));
-		foregroundColor = new Color(Display.getDefault(), new RGB(foregroundColorR, foregroundColorG, foregroundColorB));
-		textColor = new Color(Display.getDefault(), new RGB(textColorR, textColorG, textColorB));
-
 	}
 	
 	public void checkProperty(String property, String name) throws InvalidPropertyException {
@@ -1206,18 +871,6 @@ public class MD5GUI {
 		return numberOfStatsKept;
 	}
 	
-	public static Color getBackgroundColor(){
-		return backgroundColor;
-	}
-	
-	public static Color getForegroundColor(){
-		return foregroundColor;
-	}
-	
-	public static Color getTextColor(){
-		return textColor;
-	}
-
 	public static String getDefaultDirectory() {
 		return defaultDirectory;
 	}
@@ -1242,6 +895,14 @@ public class MD5GUI {
 		MD5GUI.numberOfStatsKept = numberOfStatsKept;
 	}
 	
+	public static void updateProgressBar(int amount){
+		progressBar.setSelection(amount);
+	}
+	
+	public static ProgressBar getProgressBar(){
+		return progressBar;
+	}
+	
 	/**
 	 * Wrapper to update the UI without a invalid thread access exception.
 	 * Sets the enabled flag to true or false.
@@ -1256,6 +917,34 @@ public class MD5GUI {
 		public void run(){
 			b.setEnabled(v);
 		}});
+	}
+	
+	/**
+	 * Sets the progress bar to enabled or disabled.
+	 * @param d
+	 * @param p
+	 * @param v
+	 */
+	public void setProgressEnabled(Display d, final ProgressBar p, final boolean v){
+		d.asyncExec(new Runnable() {
+			public void run() {
+				p.setVisible(v);
+			}
+		});
+	}
+	
+	/**
+	 * Changes the button text to the specified. I.e. to change Test --> Cancel.
+	 * @param d
+	 * @param b
+	 * @param text
+	 */
+	public void changeButtonText(Display d, final Button b, final String text){
+		d.asyncExec(new Runnable() {
+			public void run() {
+				b.setText(text);
+			}
+		});
 	}
 	
 	/**
@@ -1300,6 +989,305 @@ public class MD5GUI {
 			mb.setMessage(message);
 			mb.open();
 		  }});
+	}
+	
+
+	
+	/**
+	 * Does the actual testing calculations.  
+	 * Encapsuled here to ease of use to exit the method.
+	 */
+	public void testMouseButtonEvent(){
+		final MD5Functions md5Functions = new MD5Functions(sLogger, fLogger, display);
+		final String md5Filename = testMd5FileStyledText.getText().trim();
+		final boolean hasFile = !testFileToBeTestedStyledText.getText().equalsIgnoreCase("");
+		final boolean hasMd5File = !md5Filename.equalsIgnoreCase("");
+		final boolean hasMd5String = !testPasteTypeMd5styledText.getText().equalsIgnoreCase("");
+
+		if(!hasFile){
+			sLogger.logWarn("No file specified to test");
+			return;
+		}
+		
+		if(!hasMd5File && !hasMd5String){	
+			sLogger.logWarn("No MD5 specified to test the file");
+			return;
+		}
+		
+		final String filename = testFileToBeTestedStyledText.getText().trim();
+		final String md5String = testPasteTypeMd5styledText.getText().trim();
+		
+		//testButton.setEnabled(false);
+		//progressBar.setVisible(true);
+		
+		final Thread testWorker = new Thread() {
+	    	public void run() {
+	    		final long timeAtStart = System.currentTimeMillis();
+	    		String hash2 = null;
+	    		
+	    		// calculate MD5 for file
+	    		final File file = new File(filename);
+        		if(!file.exists()){
+					sLogger.logError("Unable to open file " + file.getName());
+					//setButtonEnabled(display, testButton, true);
+					return;
+				}
+        		
+				sLogger.log("Testing...");
+
+        		final String hash = md5Functions.calculateMd5(file);
+
+				if(hash == null){
+					sLogger.logError("Failed to create hash for file " + filename);
+					//setButtonEnabled(display, testButton, true);
+					return;
+				}
+									
+				if(hasMd5String){
+					hash2 = md5String;
+					
+				} else { //if(hasMd5File)
+					BufferedReader br = SimpleIO.openFileForInput(md5Filename);
+					String line = null;
+					Pattern pattern = null;
+					Matcher matcher = null;
+					
+					if(br != null){
+					
+						try {
+							while((line = br.readLine()) != null){
+								for(String regex : regExPatterns){
+									if(regex != null){
+										pattern = Pattern.compile(regex);
+										matcher = pattern.matcher(line);
+										
+										if(matcher.matches()){
+											hash2 = matcher.group(1);
+											break;
+										}
+									}
+								}// end for
+								
+							}// end while
+							
+							final String hashFromFile = hash2;
+							
+							if(hashFromFile == null){
+								StringBuffer sb = new StringBuffer();
+								sb.append("The has file does not match the standard format.\n");
+								sb.append("The standard format is as follows:\n");
+								sb.append("32 characters plus optional characters");
+								sb.append("\n");
+								sb.append("Please be sure your MD5 file is properly formatted");
+								
+								displayMsgBox(display,shell,SWT.OK|SWT.ICON_WARNING,"MD5 File Format Problem",
+										      sb.toString());
+								
+							}
+							
+						} catch (final IOException e) {
+							sLogger.logError("Unable to open MD5 file.  See log file for more info.");
+							fLogger.log("Unable to open MD5 file. Error Message: " + e.getMessage());
+						}
+					} else { // br is null (can't open file)
+							sLogger.logError("Unable to open file " + md5Filename);
+					}
+								
+				}// end else
+				
+				final String hashDisplay = hash2;
+				long currentTime = System.currentTimeMillis();
+				final String timeElapsed = getTime(timeAtStart, currentTime, MD5Constants.TIME_FORMAT_SHORT);
+				final String startTime = getTime(0, timeAtStart, MD5Constants.TIME_FORMAT_START_END);
+				final String endTime = getTime(0, currentTime, MD5Constants.TIME_FORMAT_START_END);
+				
+					
+				if(hash2 != null) {
+							
+					if(StringUtil.equalIgnoreCase(hash, hash2)){
+
+						addTableItem(file.getName(), timeElapsed, startTime, endTime, 0);
+													
+						sLogger.log("File and MD5 hash are equal! " + timeElapsed + " seconds","dark-green");
+						setStyledText(display,testResultStyledText,"Hashs are equal!",false);
+						setStyledText(display,testResultStyledText,"\n"+hash+ MD5Constants.MD5_SPACER +file.getName(),true);
+						setStyledText(display,testResultStyledText,"\n"+hashDisplay+" MD5 Hash",true);								
+						
+					} else {									
+						sLogger.log("File and MD5 hash are NOT equal! " + timeElapsed + " seconds", "red");
+						setStyledText(display,testResultStyledText,"Hashs are NOT equal!",false);
+						setStyledText(display,testResultStyledText,"\n"+hash+ MD5Constants.MD5_SPACER +file.getName(),true);
+						setStyledText(display,testResultStyledText,"\n"+hashDisplay+" MD5 Hash",true);
+						
+					}
+				}
+				
+	    	}
+		};
+		
+		testWorker.start();
+	}
+	
+	/**
+	 * Does the actual creation of the md5 calculations.  
+	 * Encapsuled here to ease of use to exit the method.
+	 *
+	 */
+	public void calculateMouseEvent(){
+		final MD5Functions md5Functions = new MD5Functions(sLogger, fLogger, display, caculateResultStyledText);
+		final String filename = calculateBrowseStyledText.getText().trim();
+    	final String string = calculateStringStyledText.getText().trim();
+    	
+    	//calculateButton.setEnabled(false);
+    	
+	    final Thread worker = new Thread() {
+	    	public void run() {
+
+	        	final boolean hasFile = !(filename == null || filename.equalsIgnoreCase(""));
+	        	final boolean hasString = !(string == null || string.equalsIgnoreCase(""));
+	        	boolean isDirectory = false;
+	        	final long timeAtStart = System.currentTimeMillis();
+	        	
+	        	// Check both fields, if empty, log msg to screen
+	        	if(!hasFile && !hasString){
+	        		sLogger.logWarn("No file, directory or String is specified. Please choose a file, directory or enter a String");
+	        		//setButtonEnabled(display,calculateButton,true);
+	        		
+	        		return;
+	        	}
+	        	
+	        	
+	        	if(hasFile){
+	        		
+	        		final File file = new File(filename);
+	        		// check if file exists
+	        		if(!file.exists()){
+	        			sLogger.logError("File does not exist! Not calculating MD5");
+	        			//setButtonEnabled(display,calculateButton,true);
+		        		
+		        		return;
+	        		}
+	        		
+	        		sLogger.log("Calculating MD5 for file " + file.getName() + "...");
+
+		        	isDirectory = file.isDirectory();
+		        	
+		        	if(isDirectory){
+		        		// Calculate for all files in this directory
+		        		final String md5File = defaultDirectory+"\\"+ file.getName() + MD5Constants.MD5_EXT;
+		        		
+		        		if(SimpleIO.exists(md5File)){
+			        		display.syncExec(
+		        			new Runnable() {
+		        			public void run(){
+		        				msgBoxBool = false;
+								MessageBox mb = new MessageBox(shell, SWT.YES | SWT.NO);
+								mb.setText("File Already Exists");	
+								mb.setMessage("File " + md5File + " already exists\n Overwrite?");
+								if(mb.open() == SWT.NO){
+						        	sLogger.logWarn("Chose not to overwrite the file. Did not create MD5(s)");
+						        	msgBoxBool = true;
+								}
+				        	}});
+							
+			        		if(msgBoxBool){
+			        			//setButtonEnabled(display,calculateButton,true);	
+			        			return;
+			        		}
+		        		}
+		        		
+		        		PrintWriter pw = null;
+		        		try {
+		        			pw = SimpleIO.openFileForOutput(md5File);
+		        		} catch (CanNotWriteToFileException e){
+		        			sLogger.logError("Can not write to file " + md5File +". Did not create MD5(s)");
+		        			//setButtonEnabled(display,calculateButton,true);
+	        			
+		        			return;
+		        		}
+		        		
+		        		setStyledText(display,caculateResultStyledText,"",false);
+		        		
+		        		// recurse directories or not?
+		        		if(recurseDirectory){
+		        			md5Functions.recurseDirectory(file, pw);
+		        		} else {
+		        			md5Functions.singleDirectory(file, pw);
+		        		}
+		        		
+		        	
+        				long currentTime = System.currentTimeMillis();
+						String timeElapsed = getTime(timeAtStart, currentTime, MD5Constants.TIME_FORMAT_SHORT);
+						String startTime = getTime(0, timeAtStart, MD5Constants.TIME_FORMAT_START_END);
+						String endTime = getTime(0, currentTime, MD5Constants.TIME_FORMAT_START_END);
+						
+						addTableItem(file.getName(), timeElapsed, startTime, endTime, 0);
+						
+        				sLogger.log("File Hash(s) created in file " + md5File + ". " + timeElapsed + " seconds");
+        				//setButtonEnabled(display,calculateButton,true);	
+		        		
+		        		// close the file
+		        		if(pw != null){
+		        			pw.close();
+		        		}
+		        		
+		        	} else {
+		        		
+		        		final String hash = md5Functions.calculateMd5(file);
+		        		
+						if(hash == null){
+							sLogger.logError("Failed to create hash for file " + file.getName());
+							//setButtonEnabled(display,calculateButton,true);
+							return;
+						}
+						
+        				long currentTime = System.currentTimeMillis();
+						String timeElapsed = getTime(timeAtStart, currentTime, MD5Constants.TIME_FORMAT_SHORT);
+						String startTime = getTime(0, timeAtStart, MD5Constants.TIME_FORMAT_START_END);
+						String endTime = getTime(0, currentTime, MD5Constants.TIME_FORMAT_START_END);
+						
+						setStyledText(display,caculateResultStyledText,hash+MD5Constants.MD5_SPACER +file.getName(),false);
+						
+						addTableItem(file.getName(), timeElapsed, startTime, endTime, 0);
+						
+						sLogger.log("File Hash created. " + timeElapsed + " seconds");
+						//setButtonEnabled(display,calculateButton,true);																		
+		        	}
+	        	}// end if(hasFile)
+	        	
+	        	if(hasString){
+	        		final String hash = md5Functions.calculateMd5(string);			        		
+    				
+	        		sLogger.log("Calculating MD5 for string " + string + "...");
+
+	        		if(hash == null){
+	        			sLogger.logError("Failed to create hash for string " + string);
+	        			//setButtonEnabled(display,calculateButton,true);
+	        			return;
+	        		}
+	        		
+    				long currentTime = System.currentTimeMillis();
+					String timeElapsed = getTime(timeAtStart, currentTime, MD5Constants.TIME_FORMAT_SHORT);
+					String startTime = getTime(0, timeAtStart, MD5Constants.TIME_FORMAT_START_END);
+					String endTime = getTime(0, currentTime, MD5Constants.TIME_FORMAT_START_END);
+					
+	        		if(hasFile){
+	        			setStyledText(display,caculateResultStyledText,"\n"+hash+ MD5Constants.MD5_SPACER +string,true);
+	        		} else {
+	        			setStyledText(display,caculateResultStyledText,hash+ MD5Constants.MD5_SPACER +string,false);
+	        		}
+					
+					addTableItem(string, timeElapsed, startTime, endTime, 0);
+					
+	        		sLogger.log("Hash(s) created. " + timeElapsed + " seconds");	
+	        		
+	        		//setButtonEnabled(display,calculateButton,true);	
+    				
+	        	}// end if hasString	
+	        }// end run()	
+	    };
+	    
+	    worker.start();
 	}
 	
 }
