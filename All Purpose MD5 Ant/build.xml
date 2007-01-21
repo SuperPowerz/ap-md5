@@ -1,0 +1,187 @@
+<!-- ====================================================== -->
+<!-- = Author: Nick Powers                                = -->
+<!-- = Last Updated: 8/17/2006                            = -->
+<!-- = The default target build the APMD5 jar.            = -->
+<!-- = The generate-installer target generates the IzPack = -->
+<!-- = installer.                                         = -->
+<!-- ====================================================== -->
+
+  <project name="APMD5" default="dist" basedir=".">
+  <description>Build file to build the All Purpose MD5 Application</description>
+       
+  <tstamp/>
+	
+  <!-- relative to the source directory -->
+  <property name="src" location="../All Purpose MD5"/>
+  <property name="build" location="build"/>
+  <property name="images.dir" location="${src}/images"/>
+  <property name="props.dir" location="${src}/properties"/>
+	
+  <!-- relative to the dist directory -->
+  <property name="dist"  location="dist"/>
+  <property name="dist.files" location="dist_files"/>
+  <property name="dist.images" location="${dist}/images"/>
+  <property name="dist.doc" location="${dist}/doc"/>
+  <property name="dist.src" location="${dist}/src"/>
+	
+  <!-- other values -->
+  <property name="program.name" value="apmd5"/>
+  <property name="ver" value="1.0" />
+
+  <!-- IzPack Variables -->
+  <property name="iz.base.dir" location="C:\Program Files\IzPack"/>
+  <property name="iz.dir" location="IzPack"/>
+  <property name="iz.dist.dir" location="${iz.dir}/dist"/>
+	
+  <!-- Class Paths -->
+  <path id="swt.classpath">
+    <fileset dir="${dist.files}">                                        
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+	
+<!-- =================================================== -->
+<!-- =        Init Target - Creates directories        = -->
+<!-- =================================================== -->
+  <target name="init">
+    <mkdir dir="${build}"/>
+  	<mkdir dir="${dist}"/>
+  	<mkdir dir="${dist}/properties"/>
+  	<mkdir dir="${dist}/doc"/>
+  </target>
+	
+<!-- =================================================== -->
+<!-- =    Compiles Target - Compiles source files      = -->
+<!-- =================================================== -->
+  <target name="compile" depends="init"
+        description="compile the source " >
+    <!-- Compile the java code from ${src} into ${build} -->
+    <javac srcdir="${src}" destdir="${build}" classpathref="swt.classpath"/>
+  </target>
+	
+<!-- =================================================== -->
+<!-- =      Dist Target - Create jars, copy files      = -->
+<!-- =================================================== -->
+  <target name="dist" depends="compile"
+        description="generate the distribution" >
+    	
+    <!-- Jar everything in ${build} into the MyProject-${DSTAMP}.jar file -->
+  	<echo message="Creating dist ${dist}"/>
+    <jar jarfile="${dist}/APMD5.jar" manifest="${src}/MANIFEST.MF" basedir="${build}"/>
+  	
+  	<!-- copy other jars and dll files to dist directory -->
+    <copy todir="${dist}/">
+      <fileset dir="${dist.files}">
+        <include name="**/*.jar"/>
+        <include name="**/*.dll"/>
+      </fileset>
+    </copy>
+  	
+  	<!-- copy properties files -->
+  	<copy todir="${dist}">
+  	 <fileset dir="${src}">
+  	 	<include name="**/properties/*.properties"/>
+  	 	<include name="**/properties/README"/>
+  	 </fileset>
+    </copy>
+  	
+  	<!-- create properties jar -->
+  	<jar jarfile="${dist}/APMD5_properties.jar"	basedir="${dist}/properties"/>
+  	
+  	<!-- copy images directory -->
+  	<copy todir="${dist}/images">
+  		<fileset dir="${images.dir}"/>
+  	</copy>
+  	
+  	<!-- copy gpl license and other text files -->
+  	<copy todir="${dist}">
+  		<fileset dir="${src}">
+  			<include name="**/gpl.txt"/>
+  			<include name="**/install.txt"/>
+  			<include name="**/info.txt"/>
+  		</fileset>
+  	</copy>
+  	
+  	<!-- copy docs -->
+  	<copy todir="${dist.doc}">
+  		<fileset dir="${src}/doc">
+  			<include name="*.txt"/>
+  			<include name="*.pdf"/>
+  			<include name="*.html"/>
+  		</fileset>
+  	</copy>
+  	
+  	<!-- Copy Source to src directory -->
+  	<copy todir="${dist.src}">
+  		<fileset dir="${src}">
+  			<include name="**/com/swtdesigner/*.java"/>
+  			<include name="**/exceptions/*.java"/>
+  			<include name="**/gui/*.java"/>
+  			<include name="**/md5/*.java"/>
+  			<include name="**/util/*.java"/>
+  		</fileset>
+  	</copy>
+  </target>
+	
+<!-- =================================================== -->
+<!-- =      Clean Target - deletes directories         = -->
+<!-- =================================================== -->
+  <target name="clean"
+          description="clean up" >
+  	
+    <!-- Delete the ${build} and ${dist} directory trees -->
+    <delete dir="${build}"/>
+    <delete dir="${dist}"/>
+  	<delete dir="images"/>
+  	<delete dir="src"/>
+  </target>
+	
+<!-- =================================================== -->
+<!-- =        Creates an installer for IzPack          = -->
+<!-- =  Params: installer.xmlfile, installer.name      = -->
+<!-- =================================================== -->
+  <target name="generate.installer.worker">
+	
+    <!-- Allows us to use the IzPack Ant task -->
+    <echo message="Defining a task name using ${iz.base.dir}/lib/compiler.jar"/>
+    <taskdef name="izpack"
+	         classpath="${iz.base.dir}/lib/compiler.jar"
+	         classname="com.izforge.izpack.ant.IzPackTask" />        
+	
+    <!-- Call the default build -->
+    <antcall target="dist"/>
+	
+    <!-- Call IzPack -->
+    <echo message="Makes the installer using IzPack" level="verbose" />
+    <izpack input="${iz.dir}\${installer.xmlfile}"
+	        output="${installer.name}${ver}.jar"
+	        installerType="standard"
+			basedir="${dist}"
+	    	izPackDir="${iz.base.dir}"/>
+  </target>
+	
+	<!--    compression="bzip2"
+	        compressionlevel="9" 
+	-->
+	
+<!-- =================================================== -->
+<!-- =     Creates a normal installer for IzPack       = -->
+<!-- =================================================== -->
+  <target name="generate.installer">
+    <antcall target="generate.installer.worker">
+      <param name="installer.xmlfile" value="install.xml" />
+      <param name="installer.name" value="APMD5-install-" />
+    </antcall>
+  </target>
+	
+<!-- =================================================== -->
+<!-- =   Creates an installer with registry support    = -->
+<!-- =================================================== -->
+  <target name="generate.installer.reg">
+    <antcall target="generate.installer.worker">
+      <param name="installer.xmlfile" value="install-reg.xml" />
+      <param name="installer.name" value="APMD5-install-reg-" />
+    </antcall>
+  </target>	
+	
+</project>

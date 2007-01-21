@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<shortcuts>
+
+  <programGroup defaultName="All Purpose MD5" location="applications"/>
+
+  <shortcut
+     name="All Purpose MD5"
+     programGroup="yes"
+     desktop="yes"
+     applications="no"
+     startMenu="yes"
+     startup="no"
+     target="$INSTALL_PATH/apmd5.jar"
+     commandLine=""
+     workingDirectory=""
+     description="All Purpose MD5"
+     iconFile="$INSTALL_PATH/images/apmd5_16.png"
+     iconIndex="0"
+     type="Application"
+     encoding="UTF-8"
+     createForAll="true" 
+     initialState="noShow">
+     
+     <createForPack name="Application"/>
+   </shortcut>
+
+
+
+   <shortcut
+     name="All Purpose MD5 Uninstaller"
+     programGroup="yes"
+     desktop="yes"
+     applications="no"
+     startMenu="no"
+     startup="no"
+     target="java"
+     commandLine="-jar &quot;$INSTALL_PATH/Uninstaller/uninstaller.jar&quot;"
+     
+     initialState="noShow"
+     iconFile="trashcan_full"
+     iconIndex="0" 
+     workingDirectory=""
+     type="Application"
+     encoding="UTF-8"
+     createForAll="false"
+     description="This uninstalls All Purpose MD5">
+
+     <createForPack name="Application" />
+   </shortcut>
+
+</shortcuts>
