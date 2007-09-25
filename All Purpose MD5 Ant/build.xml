@@ -26,7 +26,7 @@
 	
   <!-- other values -->
   <property name="program.name" value="apmd5"/>
-  <property name="ver" value="1.0" />
+  <property name="ver" value="1.1" />
 
   <!-- IzPack Variables -->
   <property name="iz.base.dir" location="C:\Program Files\IzPack"/>
