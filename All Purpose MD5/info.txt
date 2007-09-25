@@ -19,6 +19,8 @@ Version History (most recent at top)
 |--------------------------------------------------------------------------|
 | Version | Release Date | Changes                                         |
 |--------------------------------------------------------------------------|
+|   1.1   |  2007/09/25  | - Update the swt.jar file to support Vista      |
+|--------------------------------------------------------------------------|
 |   1.0   |  2006/12/21  | - Encapsulated code for easier exits            |
 |         |              | - Added a progress bar                          |
 |         |              | - Switched the Test and Calculate tab           |
