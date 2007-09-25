@@ -60,7 +60,7 @@ public interface MD5Constants {
 	// Other constants
 	public static String PROGRAM_NAME = "All Purpose MD5";
 	public static String AUTHORS = "Nick Powers";
-	public static String VERSION = "1.0";
+	public static String VERSION = "1.1";
 	public static String WEBSITE = "http://powers.nick.googlepages.com/home";
 	
 }
