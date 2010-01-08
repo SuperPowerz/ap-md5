@@ -2,15 +2,23 @@
 <installation version="1.0">
     <info>
         <appname>All Purpose MD5</appname>
-        <appversion>1.1</appversion>
+        <appversion>1.2</appversion>
         <authors>
-            <author name="Nick Powers" email="powers.nick@gmail.com"/>
+            <author name="Nick Powers" email=""/>
         </authors>
         <url>http://powers.nick.googlepages.com/home</url>
+        <run-privileged condition="izpack.windowsinstall.vista"/>
     </info>		<guiprefs width="640" height="480" resizable="no"/>	<!-- English only -->
     <locale>
         <langpack iso3="eng"/>
     </locale>
+	<listeners>
+	    <listener installer="RegistryInstallerListener"
+	        uninstaller="RegistryUninstallerListener" >
+	        <os family="windows"/>
+	    </listener>
+	</listeners>
+
     <resources>
         <res id="LicencePanel.licence" src="gpl.txt"/>
         <res id="InfoPanel.info" src="info.txt"/>
@@ -30,6 +38,8 @@
         <res src="../IzPack/shortcutSpec.xml" id="shortcutSpec.xml" />
         <res src="../IzPack/Unix_shortcutSpec.xml" id="Unix_shortcutSpec.xml" />
         
+        <!-- Registry Changes (removed)-->
+        <!-- <res src="../IzPack/RegistrySpec.xml" id="RegistrySpec.xml"/>-->
     </resources>
     <panels>
         <panel classname="HelloPanel"/>
@@ -46,6 +56,7 @@
             <description>The Application</description>
             <file src="images" targetdir="$INSTALL_PATH"/>
             <file src="properties" targetdir="$INSTALL_PATH"/>
+            <file src="exe" targetdir="$INSTALL_PATH"/>
             <file src="APMD5.jar" targetdir="$INSTALL_PATH"/>
             <file src="APMD5_properties.jar" targetdir="$INSTALL_PATH"/>
             <file src="swt.jar" targetdir="$INSTALL_PATH"/>
@@ -68,6 +79,14 @@
     </packs>
 	
 	<!-- For creating shortcuts on Windows Machines -->
-	<native type="izpack" name="ShellLink.dll"/>
+	<native type="izpack" name="ShellLink.dll">
+		<os family="windows"/>
+	</native>
+	
+	<!-- For modifying the registry in Windows -->
+	<native type="3rdparty" name="COIOSHelper.dll" stage="both">
+    	<os family="windows"/>
+	</native>
+	
 	
 </installation>
