@@ -6,11 +6,6 @@ Long have I looked for a MD5 program that is easy, intuitive and most importantl
 I have seen many MD5 programs that do some of this, but many of them are closed source and
 I was always afraid of spyware or hidden code.  Thus, is born All Purpose MD5.
 
-If you have any suggestions or want to join this project, please email me at powers.nick@gmail.com.
-Also, if you find this program useful, or crappy, tell me.  I'd like to know if you get any use out of
-this program.  Additionally, if you are running a Open Source project and are looking for an experienced
-developer, send me an email.  I am always looking for more experience.
-
 All Purpose MD5 Homepage
 http://powers.nick.googlepages.com/home
 
@@ -18,6 +13,10 @@ http://powers.nick.googlepages.com/home
 Version History (most recent at top)
 |--------------------------------------------------------------------------|
 | Version | Release Date | Changes                                         |
+|--------------------------------------------------------------------------|
+|   2.0   |  2010/??/??  | - Redesign...(in progress)                      |
+|--------------------------------------------------------------------------|
+|   1.2   |  2009/03/16  | - Updated IZPack installer to version 4.2.1     |
 |--------------------------------------------------------------------------|
 |   1.1   |  2007/09/25  | - Update the swt.jar file to support Vista      |
 |--------------------------------------------------------------------------|
