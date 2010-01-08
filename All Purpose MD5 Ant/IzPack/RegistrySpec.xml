@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>
+<!-- Registry entry to run as admin in vista -->
+<registry>
+	<pack name="Core">
+		<value name="$INSTALL_PATH\$APP_NAME"
+       		   keypath="Software\Microsoft\Windows NT\Currentversion\Appcompatflags\layers"
+       		   root="HKCU"
+       		   string="RUNASADMIN"/>
+	</pack>
+</registry>
