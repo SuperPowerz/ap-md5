@@ -4,9 +4,23 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
+
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.*;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Canvas;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.CoolBar;
+import org.eclipse.swt.widgets.CoolItem;
+import org.eclipse.swt.widgets.Display;
 
 /**
  * Utility class for managing OS resources associated with SWT controls such as
@@ -87,8 +101,8 @@ public class SWTResourceManager {
      * Dispose of all the cached colors
      */
     public static void disposeColors() {
-        for (Iterator iter = m_ColorMap.values().iterator(); iter.hasNext();)
-             ((Color) iter.next()).dispose();
+        for (Iterator<Color> iter = m_ColorMap.values().iterator(); iter.hasNext();)
+             iter.next().dispose();
         m_ColorMap.clear();
     }
 
@@ -157,7 +171,7 @@ public class SWTResourceManager {
      * @param path String The path to the image file
      * @return Image The image stored in the file at the specified path
      */
-    public static Image getImage(Class clazz, String path) {
+    public static Image getImage(Class<?> clazz, String path) {
         String key = clazz.getName() + '|' + path;
         Image image = m_ClassImageMap.get(key);
         if (image == null) {
@@ -223,7 +237,7 @@ public class SWTResourceManager {
 	 * @param corner The corner to place decorator image
 	 * @return Image The resulting decorated image
 	 */
-	public static Image decorateImage(Image baseImage, Image decorator, int corner) {
+	public static Image decorateImage(final Image baseImage, final Image decorator, final int corner) {
 		HashMap<Image, Image> decoratedMap = m_ImageToDecoratorMap.get(baseImage);
 		if (decoratedMap == null) {
 			decoratedMap = new HashMap<Image, Image>();
@@ -257,14 +271,14 @@ public class SWTResourceManager {
      * Dispose all of the cached images
      */
     public static void disposeImages() {
-        for (Iterator I = m_ClassImageMap.values().iterator(); I.hasNext();)
-             ((Image) I.next()).dispose();
+        for (Iterator<Image> I = m_ClassImageMap.values().iterator(); I.hasNext();)
+             I.next().dispose();
         m_ClassImageMap.clear();
         //
-        for (Iterator I = m_ImageToDecoratorMap.values().iterator(); I.hasNext();) {
-			HashMap decoratedMap = (HashMap) I.next();
-			for (Iterator J = decoratedMap.values().iterator(); J.hasNext();) {
-				Image image = (Image) J.next();
+        for (Iterator<HashMap<Image, Image>> I = m_ImageToDecoratorMap.values().iterator(); I.hasNext();) {
+			HashMap<Image, Image> decoratedMap = I.next();
+			for (Iterator<Image> J = decoratedMap.values().iterator(); J.hasNext();) {
+				Image image = J.next();
 				image.dispose();
 			}
 		}
@@ -275,8 +289,8 @@ public class SWTResourceManager {
 	 * @param section the section do dispose
 	 */
 	public static void disposeImages(String section) {
-		for (Iterator I = m_ClassImageMap.keySet().iterator(); I.hasNext();) {
-			String key = (String) I.next();
+		for (Iterator<String> I = m_ClassImageMap.keySet().iterator(); I.hasNext();) {
+			String key = I.next();
 			if (!key.startsWith(section + '|'))
 				continue;
 			Image image = m_ClassImageMap.get(key);
@@ -328,7 +342,7 @@ public class SWTResourceManager {
         	FontData fontData = new FontData(name, size, style);
     		if (strikeout || underline) {
     			try {
-    				Class logFontClass = Class.forName("org.eclipse.swt.internal.win32.LOGFONT"); //$NON-NLS-1$
+    				Class<?> logFontClass = Class.forName("org.eclipse.swt.internal.win32.LOGFONT"); //$NON-NLS-1$
     				Object logFont = FontData.class.getField("data").get(fontData); //$NON-NLS-1$
     				if (logFont != null && logFontClass != null) {
     					if (strikeout) {
@@ -370,9 +384,14 @@ public class SWTResourceManager {
      * Dispose all of the cached fonts
      */
     public static void disposeFonts() {
-        for (Iterator iter = m_FontMap.values().iterator(); iter.hasNext();)
-             ((Font) iter.next()).dispose();
+		// clear fonts
+        for (Iterator<Font> iter = m_FontMap.values().iterator(); iter.hasNext();)
+             iter.next().dispose();
         m_FontMap.clear();
+		// clear bold fonts
+        for (Iterator<Font> iter = m_FontToBoldFontMap.values().iterator(); iter.hasNext();)
+        	iter.next().dispose();
+        m_FontToBoldFontMap.clear();
     }
 
 	//////////////////////////////
@@ -434,8 +453,8 @@ public class SWTResourceManager {
      * Dispose all of the cached cursors
      */
     public static void disposeCursors() {
-        for (Iterator iter = m_IdToCursorMap.values().iterator(); iter.hasNext();)
-             ((Cursor) iter.next()).dispose();
+        for (Iterator<Cursor> iter = m_IdToCursorMap.values().iterator(); iter.hasNext();)
+             iter.next().dispose();
         m_IdToCursorMap.clear();
     }
 }
