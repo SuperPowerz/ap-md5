@@ -57,7 +57,7 @@ public class APMD5 {
 	
 
 	private Label fileToBeTestedHelpLabel_3;
-	private Label fileToBeTestedHelpLabel_2;
+	private Label chooseAFileDirHelpLabel;
 	private Label fileToBeTestedHelpLabel_1;
 	private Label checkSumStringHelpLabel;
 	private Label checkSumFileHelpLabel;
@@ -327,7 +327,7 @@ public class APMD5 {
 		testInputGroup.setText("Test Input");
 
 		fileToBeTestedHelpLabel = new Label(testInputGroup, SWT.NONE);
-		fileToBeTestedHelpLabel.setToolTipText("Choose a file for which you wish to calculate a checksum. \nThe resulting checksum will be tested against either a checksum file\n or a checksum you paste below.");
+		fileToBeTestedHelpLabel.setToolTipText("Choose a file for which you wish to calculate a checksum. \r\nThe resulting checksum will be tested against either a checksum file\r\n or a checksum you paste below.");
 		fileToBeTestedHelpLabel.setImage(SWTResourceManager.getImage(APMD5.class, "/images/question-16.png"));
 		fileToBeTestedHelpLabel.setBounds(140, 29, 16, 16);
 
@@ -337,7 +337,7 @@ public class APMD5 {
 		checkSumStringHelpLabel.setBounds(231, 150, 16, 16);
 
 		checkSumFileHelpLabel = new Label(testInputGroup, SWT.NONE);
-		checkSumFileHelpLabel.setToolTipText("You may choose a text file that includes a checksum.\nThat file will be opened and read and tested against\nthe file chosen above.");
+		checkSumFileHelpLabel.setToolTipText("You may choose a text file that includes a checksum.\r\nThat file will be opened and read and tested against\r\nthe file chosen above.");
 		checkSumFileHelpLabel.setImage(SWTResourceManager.getImage(APMD5.class, "/images/question-16.png"));
 		checkSumFileHelpLabel.setBounds(130, 91, 16, 16);
 
@@ -460,17 +460,17 @@ public class APMD5 {
 		fileToBeTestedHelpLabel_3 = new Label(calculateInputGroup, SWT.NONE);
 		fileToBeTestedHelpLabel_3.setImage(SWTResourceManager.getImage(APMD5.class, "/images/question-16.png"));
 		fileToBeTestedHelpLabel_3.setBounds(239, 126, 16, 16);
-		fileToBeTestedHelpLabel_3.setToolTipText("Choose a file for which you wish to calculate a checksum. \nThe resulting checksum will be tested against either a checksum file\n or a checksum you paste below.");
+		fileToBeTestedHelpLabel_3.setToolTipText("Type in a string in order to get a checksum for it.\n This is useful for getting a hash of a password for testing or storage.");
 
-		fileToBeTestedHelpLabel_2 = new Label(calculateInputGroup, SWT.NONE);
-		fileToBeTestedHelpLabel_2.setImage(SWTResourceManager.getImage(APMD5.class, "/images/question-16.png"));
-		fileToBeTestedHelpLabel_2.setBounds(150, 22, 16, 16);
-		fileToBeTestedHelpLabel_2.setToolTipText("Choose a file for which you wish to calculate a checksum. \nThe resulting checksum will be tested against either a checksum file\n or a checksum you paste below.");
+		chooseAFileDirHelpLabel = new Label(calculateInputGroup, SWT.NONE);
+		chooseAFileDirHelpLabel.setImage(SWTResourceManager.getImage(APMD5.class, "/images/question-16.png"));
+		chooseAFileDirHelpLabel.setBounds(150, 22, 16, 16);
+		chooseAFileDirHelpLabel.setToolTipText("Choose either a file or a directory to calculate a checksum\nor a list of checksums (if a directory is chosen).");
 
 		fileToBeTestedHelpLabel_1 = new Label(calculateInputGroup, SWT.NONE);
 		fileToBeTestedHelpLabel_1.setImage(SWTResourceManager.getImage(APMD5.class, "/images/question-16.png"));
 		fileToBeTestedHelpLabel_1.setBounds(208, 66, 16, 16);
-		fileToBeTestedHelpLabel_1.setToolTipText("Choose a file for which you wish to calculate a checksum. \nThe resulting checksum will be tested against either a checksum file\n or a checksum you paste below.");
+		fileToBeTestedHelpLabel_1.setToolTipText("Select either a file or a directory. If a directory is chosen, consider recusivley \ncalculating checksums by checking the box to the right.");
 
 		calculateButton = new Button(calculateInputGroup, SWT.NONE);
 		calculateButton.addSelectionListener(new SelectionAdapter() {
