@@ -24,6 +24,8 @@ package com.powers.apmd5.exceptions;
 
 public class InvalidPropertyException extends Exception {
 
+	private static final long serialVersionUID = 7258804182524235564L;
+	
 	private String extraInformation = null;
 	
 	public InvalidPropertyException() {

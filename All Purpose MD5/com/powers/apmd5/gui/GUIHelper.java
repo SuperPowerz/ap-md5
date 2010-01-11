@@ -114,8 +114,15 @@ public class GUIHelper {
 					}// end while
 					
 					if(StringUtil.isBlank(hash)){
-						String msg = "The has file does not match the standard format.\nThe standard format is as follows:\n32 characters plus optional characters\nPlease be sure your MD5 file is properly formatted";
-						GUIUtil.displayMessageBox(apmd5.shell, SWT.OK | SWT.ICON_WARNING, msg, "File Format Problem");
+						StringBuilder sb = new StringBuilder();
+						
+						sb.append("The checksum file does not match a standard format that I recognize.\n");
+						sb.append("The standard formats that I recognize (in regex format) is as follows:");
+						for(String s : MD5Constants.REGEX_PATTERN_LIST){
+							sb.append("\n").append(s);
+						}
+						sb.append("\n\nPlease be sure your checksum file is properly formatted");
+						GUIUtil.displayMessageBox(apmd5.shell, SWT.OK | SWT.ICON_WARNING, sb.toString(), "File Format Problem");
 					}
 					
 				} catch (final IOException e) {
@@ -305,7 +312,7 @@ public class GUIHelper {
 	    		}
 	    		
 			} else {
-				updateStatus("Calculating MD5 for file " + file.getName() + "...");	  
+				updateStatus("Calculating checksum for file " + file.getName() + "...");	  
 				
 				final String hash = checksumCalculator.calculate(file);
 				
@@ -321,7 +328,7 @@ public class GUIHelper {
 			for(int i=0; i<files.length; i++){
 				if(files[i] != null){
 					if(!files[i].isDirectory()){
-						updateStatus("Calculating MD5 for file " + files[i].getName() + "...");
+						updateStatus("Calculating checksum for file " + files[i].getName() + "...");
 						
 						final String hash = checksumCalculator.calculate(files[i]);
 						

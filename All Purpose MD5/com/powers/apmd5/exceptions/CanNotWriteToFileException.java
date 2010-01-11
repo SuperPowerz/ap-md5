@@ -24,6 +24,8 @@ package com.powers.apmd5.exceptions;
 
 public class CanNotWriteToFileException extends Exception {
 
+	private static final long serialVersionUID = 2493776824022075065L;
+
 	public CanNotWriteToFileException() {
 		super();
 	}
