@@ -2,11 +2,11 @@
 <installation version="1.0">
     <info>
         <appname>All Purpose MD5</appname>
-        <appversion>1.2</appversion>
+        <appversion>2.0</appversion>
         <authors>
             <author name="Nick Powers" email=""/>
         </authors>
-        <url>http://powers.nick.googlepages.com/home</url>
+        <url>http://sites.google.com/site/allpurposemd5/home</url>
         <run-privileged condition="izpack.windowsinstall.vista"/>
     </info>		<guiprefs width="640" height="480" resizable="no"/>	<!-- English only -->
     <locale>
@@ -54,9 +54,9 @@
     <packs>
         <pack name="Application" required="yes">
             <description>The Application</description>
-            <file src="images" targetdir="$INSTALL_PATH"/>
+            <!--  <file src="images" targetdir="$INSTALL_PATH"/>-->
             <file src="properties" targetdir="$INSTALL_PATH"/>
-            <file src="exe" targetdir="$INSTALL_PATH"/>
+            <!--  <file src="exe" targetdir="$INSTALL_PATH"/>-->
             <file src="APMD5.jar" targetdir="$INSTALL_PATH"/>
             <file src="APMD5_properties.jar" targetdir="$INSTALL_PATH"/>
             <file src="swt.jar" targetdir="$INSTALL_PATH"/>
@@ -65,7 +65,7 @@
             <file src="swt-wgl-win32-3232.dll" targetdir="$INSTALL_PATH"/>
             <file src="swt-win32-3232.dll" targetdir="$INSTALL_PATH"/>
             
-            <file src="info.txt" targetdir="$INSTALL_PATH"/>
+            <!--  <file src="info.txt" targetdir="$INSTALL_PATH"/>-->
             <file src="gpl.txt" targetdir="$INSTALL_PATH"/>
         </pack>
         <pack name="Documentation" required="no">
