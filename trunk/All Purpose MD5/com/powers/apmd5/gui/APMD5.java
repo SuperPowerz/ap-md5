@@ -2,23 +2,23 @@ package com.powers.apmd5.gui;
 
 
 
-import static com.powers.apmd5.util.MD5Constants.*;
 import static com.powers.apmd5.util.StringUtil.*;
+import static com.powers.apmd5.gui.GUIHelper.*;
+import static com.powers.apmd5.gui.MD5Constants.*;
+
 
 import java.io.File;
-import java.io.PrintWriter;
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseTrackAdapter;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.FormAttachment;
@@ -38,23 +38,23 @@ import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
+import org.eclipse.swt.widgets.Text;
 
 import com.powers.apmd5.checksum.ChecksumCalculator;
 import com.powers.apmd5.checksum.md5.MD5;
 import com.powers.apmd5.checksum.sha.SHA;
-import com.powers.apmd5.exceptions.CanNotWriteToFileException;
-import com.powers.apmd5.gui.GUIHelper.*;
+import com.powers.apmd5.gui.GUIHelper.CalculateAChecksum;
+import com.powers.apmd5.gui.GUIHelper.ChecksumTestResult;
+import com.powers.apmd5.gui.GUIHelper.PopulateChecksum;
+import com.powers.apmd5.gui.GUIHelper.TestAChecksum;
 import com.powers.apmd5.util.FileLogger;
 import com.powers.apmd5.util.GUIUtil;
-import com.powers.apmd5.util.MD5Constants;
 import com.powers.apmd5.util.ScreenLogger;
-import com.powers.apmd5.util.SimpleIO;
 import com.powers.apmd5.util.StringUtil;
 import com.swtdesigner.SWTResourceManager;
+import org.eclipse.swt.layout.FillLayout;
 
 public class APMD5 {
-
-	
 
 	private Label fileToBeTestedHelpLabel_3;
 	private Label chooseAFileDirHelpLabel;
@@ -70,43 +70,41 @@ public class APMD5 {
 	
 	private Button chooseAFileRadioButton;
 	private Button chooseADirectoryRadioButton;
-	private StyledText calculateBrowseStyledText;
-	private StyledText calculateStringStyledText;
-	private Button calculateButton;
+	private Text calculateBrowseStyledText;
+	private Text calculateStringStyledText;
+	
 	private Group calculateInputGroup;
 	private StyledText messageStyledText;
-	private Button testButton;
-	private StyledText testPasteTypeMd5styledText;
-	private StyledText testMd5FileStyledText;
-	private StyledText testFileToBeTestedStyledText;
+	private Text testPasteTypeMd5styledText;
+	private Text testMd5FileStyledText;
+	private Text testFileToBeTestedStyledText;
 	MenuItem md5MenuItem;
 	MenuItem sha1MenuItem;
 
 	// Public Members
 	public APMD5 apmd5 = this;
 	public Shell shell;
-	public StyledText testResultStyledText;
+	public Text testResultStyledText;
 	public Display display = null;
 	public Label testStatusIcon;
 	public ProgressBar progressBar;
-	public StyledText caculateResultStyledText;
+	public Text caculateResultStyledText;
 	public Button recurseDirectoriesButton;
 	public Button createFileButton;
+	public Button testButton;
+	public Button calculateButton;
 	
 	// Loggers
 	public ScreenLogger sLogger = null;
 	public FileLogger fLogger = null;
 	
-	
-	
-	private List<String> regExPatterns = new ArrayList<String>();
-	private String tempText = null;
-	private boolean msgBoxBool = false;
-	
-
+	public AtomicBoolean isExecuting = new AtomicBoolean();
 	
 	private static final int THREAD_POOL_SIZE = 15;
 	private final ScheduledThreadPoolExecutor threadPool = new ScheduledThreadPoolExecutor(THREAD_POOL_SIZE);
+	
+	IndeterminentProgressBar progressBarWorker = null;
+	
 	/**
 	 * Launch the application
 	 * @param args
@@ -140,41 +138,27 @@ public class APMD5 {
 	
 	public void createAndShowGUI(){
 		try {
-			boolean ok = true;
         	open();
         	// Setup the screen logger, status bar at bottom of page
         	sLogger = new ScreenLogger(messageStyledText, display);
         	// Setup the file logger to log errors
         	fLogger = new FileLogger();
         	
+        	
+        	checkIfWritableFoldersExist();
+        	
         	MD5Constants.loadOptions(getFilePath(PROPERTIES_FILE));
         	
-        	if(ok){
-        		sLogger.log("Initialization Complete");
-        	}
-
+        	progressBarWorker = new IndeterminentProgressBar(shell, progressBar, isExecuting);
+        	
+        	checkLastRun();
         	// Start Input Loop
         	runInputLoop();
         	
     	} catch (Exception e){
-    		StringBuilder sb = new StringBuilder();
-    		fLogger.log("Caught Exception " + e.getMessage());
-    		StackTraceElement[] ste = e.getStackTrace();
-    		
-    		fLogger.log("Stack Trace");
-    		for(int i=0; i<ste.length; i++){
-    			if(ste[i] != null){
-    				sb.append("Class Name: ");
-    				sb.append(ste[i].getClassName());
-    				sb.append(" File Name: ");
-    				sb.append(ste[i].getFileName());
-    				sb.append(" Method Name: ");
-    				sb.append(ste[i].getMethodName());
-    				fLogger.log(sb.toString());
-    				sb.setLength(0);
-    			}
-    		}// end for
-  
+    		errorLastRunStackTrace = GUIUtil.getStackTrace(e);
+    		fLogger.log(errorLastRunStackTrace);
+    		errorLastRun = true;
     	} finally {
     		if(fLogger != null){
     			fLogger.close();
@@ -182,15 +166,60 @@ public class APMD5 {
     	}// end finally
 
 	}// end createAndShowGUI()
-	
-//	private void loadRegexs() {
-//		String[] split = REGEX_PATTERNS.split(REGEX_DELIM);
-//		if(split == null){ return; }
-//		for(String s : split){
-//			REGEX_PATTERN_LIST.add(s);
-//		}
-//	}
 
+	private void checkIfWritableFoldersExist() throws IOException {
+		
+		// check properties file
+		String propPath = getFilePath(PROPERTIES_FILE);
+		File propFile = new File(propPath);
+		if(!propFile.exists()){
+			propFile.createNewFile();
+		}
+		
+		// check log file
+		String logPath = getFilePath(LOG_FILE_NAME);
+		File logFile = new File(logPath);
+		if(!logFile.exists()){
+			logFile.createNewFile();
+		}
+		
+//		MessageBox mb = new MessageBox(shell, SWT.ICON_ERROR);
+//		mb.setText("Configuration File Error");
+//		
+//		if(!propFile.isDirectory()){
+//			if(propFile.isFile()){
+//				mb.setMessage("It would seem that the directory assigned to be able to be written to is actually a file.\n\n Exiting");
+//			} else {
+//				try {
+//					propFile.createNewFile();
+//				} catch (IOException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//			}
+//			
+//		}
+	}
+	
+//	private boolean createDirectories(File file){
+//		String path = file.getAbsolutePath();
+//		String[] split = path.split(File.separator);
+//		if(split == null || split.length < 1){
+//			fLogger.log("Failed to create the proper directories");
+//			return false;
+//		}
+//		StringBuilder sb = new StringBuilder(split[0]);
+//		for(int i=1; i<split.length-1; i++){
+//			sb.append(split[i]);
+//			File f = new File(sb.toString());
+//			if(!f.exists()){
+//				f.createNewFile()
+//			}
+//		}
+//		
+//		return true;
+//	}
+	
 	/**
 	 * Create contents of the window
 	 */
@@ -218,15 +247,6 @@ public class APMD5 {
 
 		final Menu menu_1 = new Menu(fileMenuItem);
 		fileMenuItem.setMenu(menu_1);
-
-		final MenuItem optionsMenuItem = new MenuItem(menu_1, SWT.NONE);
-		optionsMenuItem.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(final SelectionEvent e) {
-				MD5Options optionsWidget = new MD5Options(sLogger, fLogger);		
-				optionsWidget.open();
-			}
-		});
-		optionsMenuItem.setText("Options");
 
 		final MenuItem exitMenuItem = new MenuItem(menu_1, SWT.NONE);
 		exitMenuItem.addSelectionListener(new SelectionAdapter() {
@@ -260,16 +280,16 @@ public class APMD5 {
 		final MenuItem viewReadmeMenuItem = new MenuItem(menu_2, SWT.NONE);
 		viewReadmeMenuItem.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(final SelectionEvent e) {
-				MD5ReadPanel readMe = new MD5ReadPanel();
-				readMe.open();
+				BrowserDialog bd = new BrowserDialog(shell, SWT.NONE, README_URL);
+				bd.open();
 			}
 		});
-		viewReadmeMenuItem.setText("View README");
+		viewReadmeMenuItem.setText("View README (online)");
 		
 		final MenuItem viewLogMenuItem = new MenuItem(menu_2, SWT.NONE);
 		viewLogMenuItem.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(final SelectionEvent e) {
-				// close the log to view the latest changes
+				// close the log to view the latest changes (it will reopen the file automatically)
 				fLogger.close();
 				MD5ReadPanel readMe = new MD5ReadPanel();
 				readMe.open(MD5Constants.LOG_FILE_NAME);
@@ -285,11 +305,9 @@ public class APMD5 {
 				mb.setText("About");
 				
 				sb.append(MD5Constants.PROGRAM_NAME);
-				sb.append("\n");
-				sb.append("Author(s) ");
+				sb.append("\nAuthor(s) ");
 				sb.append(MD5Constants.AUTHORS);
-				sb.append("\n");
-				sb.append("Version ");
+				sb.append("\nVersion ");
 				sb.append(MD5Constants.VERSION);
 				sb.append("\n");
 				sb.append(MD5Constants.WEBSITE);
@@ -314,16 +332,22 @@ public class APMD5 {
 		final TabItem testTabItem = new TabItem(tabFolder, SWT.NONE);
 		testTabItem.setText("Test");
 
-		final Composite composite = new Composite(tabFolder, SWT.NONE);
-		testTabItem.setControl(composite);
+		final Composite testTabComposite = new Composite(tabFolder, SWT.NONE);
+		testTabItem.setControl(testTabComposite);
+		testTabComposite.setLayout(new FormLayout());
 
-		final CLabel calculateAMd5Label_1 = new CLabel(composite, SWT.NONE);
-		calculateAMd5Label_1.setBounds(111, 10, 308, 31);
+		final CLabel calculateAMd5Label_1 = new CLabel(testTabComposite, SWT.NONE);
+		FormData formData_5 = new FormData();
+		formData_5.top = new FormAttachment(0);
+		formData_5.left = new FormAttachment(0, 118);
+		calculateAMd5Label_1.setLayoutData(formData_5);
 		calculateAMd5Label_1.setFont(SWTResourceManager.getFont("Arial Unicode MS", 16, SWT.NONE));
 		calculateAMd5Label_1.setText("Test a File Against a Checksum");
 
-		final Group testInputGroup = new Group(composite, SWT.NONE);
-		testInputGroup.setBounds(10, 36, 525, 277);
+		final Group testInputGroup = new Group(testTabComposite, SWT.NONE);
+		FormData formData_4 = new FormData();
+		formData_4.left = new FormAttachment(0, 10);
+		testInputGroup.setLayoutData(formData_4);
 		testInputGroup.setText("Test Input");
 
 		fileToBeTestedHelpLabel = new Label(testInputGroup, SWT.NONE);
@@ -346,8 +370,9 @@ public class APMD5 {
 		browseToALabel_4.setBounds(36, 23, 185, 20);
 		browseToALabel_4.setText("File to be Tested");
 
-		testFileToBeTestedStyledText = new StyledText(testInputGroup, SWT.BORDER);
-		testFileToBeTestedStyledText.setBounds(38, 49, 337, 25);
+		testFileToBeTestedStyledText = new Text(testInputGroup, SWT.BORDER);
+		testFileToBeTestedStyledText.setFont(SWTResourceManager.getFont("Tahoma", 10, SWT.NORMAL));
+		testFileToBeTestedStyledText.setBounds(38, 49, 396, 25);
 
 		final Button testFileToBeTestedbrowseButton = new Button(testInputGroup, SWT.NONE);
 		testFileToBeTestedbrowseButton.addSelectionListener(new SelectionAdapter() {
@@ -359,11 +384,12 @@ public class APMD5 {
 				}
 			}
 		});
-		testFileToBeTestedbrowseButton.setBounds(381, 47, 75, 20);
+		testFileToBeTestedbrowseButton.setBounds(440, 47, 75, 25);
 		testFileToBeTestedbrowseButton.setText("Browse");
 
-		testMd5FileStyledText = new StyledText(testInputGroup, SWT.BORDER);
-		testMd5FileStyledText.setBounds(38, 112, 337, 25);
+		testMd5FileStyledText = new Text(testInputGroup, SWT.BORDER);
+		testMd5FileStyledText.setFont(SWTResourceManager.getFont("Tahoma", 10, SWT.NORMAL));
+		testMd5FileStyledText.setBounds(38, 112, 396, 25);
 
 		final CLabel browseToALabel_4_1 = new CLabel(testInputGroup, SWT.NONE);
 		browseToALabel_4_1.setFont(SWTResourceManager.getFont("Arial Unicode MS", 10, SWT.NONE));
@@ -380,11 +406,12 @@ public class APMD5 {
 				}
 			}
 		});
-		testMd5FileBrowseButton.setBounds(381, 110, 75, 20);
+		testMd5FileBrowseButton.setBounds(440, 110, 75, 25);
 		testMd5FileBrowseButton.setText("Browse");
 
-		testPasteTypeMd5styledText = new StyledText(testInputGroup, SWT.BORDER);
-		testPasteTypeMd5styledText.setBounds(38, 170, 284, 45);
+		testPasteTypeMd5styledText = new Text(testInputGroup, SWT.BORDER);
+		testPasteTypeMd5styledText.setFont(SWTResourceManager.getFont("Tahoma", 10, SWT.NORMAL));
+		testPasteTypeMd5styledText.setBounds(38, 170, 396, 45);
 
 		final CLabel browseToALabel_4_1_1 = new CLabel(testInputGroup, SWT.NONE);
 		browseToALabel_4_1_1.setFont(SWTResourceManager.getFont("Arial Unicode MS", 10, SWT.NONE));
@@ -394,6 +421,10 @@ public class APMD5 {
 		testButton = new Button(testInputGroup, SWT.NONE);
 		testButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(final SelectionEvent e) {
+				
+				//TODO
+				testResultStyledText.setText(StringUtil.EMPTY_STRING);
+				setStatusIcon(null);
 				
 				final String checksumFilePath = trim(testMd5FileStyledText.getText());
 				
@@ -416,12 +447,15 @@ public class APMD5 {
 					return;
 				}
 				
+				isExecuting.set(true);
+				
+				threadPool.submit(progressBarWorker);
 				
 				TestAChecksum worker = null;
 				if(isNotEmpty(checksumFilePath)){
-					worker = new TestAChecksum(getChecksumCalculator(), fileToBeTested, new File(checksumFilePath));
+					worker = new TestAChecksum(apmd5, getChecksumCalculator(), fileToBeTested, new File(checksumFilePath));
 				} else {
-					worker = new TestAChecksum(getChecksumCalculator(), fileToBeTested, md5String);
+					worker = new TestAChecksum(apmd5, getChecksumCalculator(), fileToBeTested, md5String);
 				}
 				
 				Future<ChecksumTestResult> future = threadPool.submit(worker);
@@ -434,27 +468,47 @@ public class APMD5 {
 		testStatusIcon = new Label(testInputGroup, SWT.NONE);
 		testStatusIcon.setBounds(286, 226, 32, 32);
 
-		final Group testResultGroup = new Group(composite, SWT.NONE);
-		testResultGroup.setBounds(10, 334, 525, 173);
+		final Group testResultGroup = new Group(testTabComposite, SWT.NONE);
+		formData_4.right = new FormAttachment(testResultGroup, 0, SWT.RIGHT);
+		formData_4.bottom = new FormAttachment(testResultGroup, -6);
+		FormData formData_3 = new FormData();
+		formData_3.top = new FormAttachment(0, 320);
+		formData_3.bottom = new FormAttachment(100, -10);
+		formData_3.right = new FormAttachment(100, -10);
+		formData_3.left = new FormAttachment(0, 10);
+		testResultGroup.setLayoutData(formData_3);
 		testResultGroup.setText("Test Result");
+		FillLayout fillLayout_1 = new FillLayout(SWT.HORIZONTAL);
+		fillLayout_1.marginHeight = 4;
+		fillLayout_1.marginWidth = 4;
+		testResultGroup.setLayout(fillLayout_1);
 
-		testResultStyledText = new StyledText(testResultGroup, SWT.V_SCROLL | SWT.BORDER);
+		testResultStyledText = new Text(testResultGroup, SWT.V_SCROLL | SWT.BORDER);
 		testResultStyledText.setFont(SWTResourceManager.getFont("Courier New", 10, SWT.NONE));
-		testResultStyledText.setBounds(10, 19, 505, 144);
 
 		final TabItem calculateTabItem = new TabItem(tabFolder, SWT.NONE);
 		calculateTabItem.setText("Calculate");
 
-		final Composite composite_1 = new Composite(tabFolder, SWT.NONE);
-		calculateTabItem.setControl(composite_1);
+		final Composite calculateTabComposite = new Composite(tabFolder, SWT.NONE);
+		calculateTabItem.setControl(calculateTabComposite);
+		calculateTabComposite.setLayout(new FormLayout());
 
-		final CLabel calculateAMd5Label = new CLabel(composite_1, SWT.NONE);
-		calculateAMd5Label.setBounds(112, 10, 249, 30);
+		final CLabel calculateAMd5Label = new CLabel(calculateTabComposite, SWT.NONE);
+		FormData formData_2 = new FormData();
+		formData_2.top = new FormAttachment(0);
+		formData_2.left = new FormAttachment(0, 157);
+		formData_2.right = new FormAttachment(100, -157);
+		calculateAMd5Label.setLayoutData(formData_2);
 		calculateAMd5Label.setFont(SWTResourceManager.getFont("Arial Unicode MS", 16, SWT.NONE));
-		calculateAMd5Label.setText("Calculate A Check Sum");
+		calculateAMd5Label.setText("Calculate A Checksum");
 
-		calculateInputGroup = new Group(composite_1, SWT.NONE);
-		calculateInputGroup.setBounds(10, 46, 525, 264);
+		calculateInputGroup = new Group(calculateTabComposite, SWT.NONE);
+		formData_2.bottom = new FormAttachment(calculateInputGroup, -6);
+		FormData formData = new FormData();
+		formData.right = new FormAttachment(100, -14);
+		formData.left = new FormAttachment(0, 10);
+		formData.top = new FormAttachment(0, 40);
+		calculateInputGroup.setLayoutData(formData);
 		calculateInputGroup.setText("Calculate Input");
 
 		fileToBeTestedHelpLabel_3 = new Label(calculateInputGroup, SWT.NONE);
@@ -464,7 +518,7 @@ public class APMD5 {
 
 		chooseAFileDirHelpLabel = new Label(calculateInputGroup, SWT.NONE);
 		chooseAFileDirHelpLabel.setImage(SWTResourceManager.getImage(APMD5.class, "/images/question-16.png"));
-		chooseAFileDirHelpLabel.setBounds(150, 22, 16, 16);
+		chooseAFileDirHelpLabel.setBounds(150, 37, 16, 16);
 		chooseAFileDirHelpLabel.setToolTipText("Choose either a file or a directory to calculate a checksum\nor a list of checksums (if a directory is chosen).");
 
 		fileToBeTestedHelpLabel_1 = new Label(calculateInputGroup, SWT.NONE);
@@ -479,7 +533,7 @@ public class APMD5 {
 				String string = trim(calculateStringStyledText.getText());
 				
 				boolean calcAString = isNotEmpty(string);
-				boolean calcAFile = chooseAFileRadioButton.getSelection() && !calcAString;
+				//boolean calcAFile = chooseAFileRadioButton.getSelection() && !calcAString;
 				
 				if(isEmpty(calculateFileOrDirPath) && isEmpty(string)){
 					sLogger.logWarn("You did not choose a file or enter a string");
@@ -524,8 +578,8 @@ public class APMD5 {
 					
 					worker = new CalculateAChecksum(apmd5, getChecksumCalculator(),calculateFileOrDirFile,saveFile, recurseDirectoriesButton.getSelection());
 				}
-				
-				
+				isExecuting.set(true);
+				threadPool.submit(progressBarWorker);
 				threadPool.submit(worker);
 				//threadPool.submit(new PopulateCalcChecksum(future, apmd5));
 
@@ -534,16 +588,18 @@ public class APMD5 {
 		calculateButton.setBounds(175, 214, 115, 25);
 		calculateButton.setText("Calculate");
 
-		calculateStringStyledText = new StyledText(calculateInputGroup, SWT.BORDER);
-		calculateStringStyledText.setBounds(38, 148, 284, 54);
+		calculateStringStyledText = new Text(calculateInputGroup, SWT.BORDER);
+		calculateStringStyledText.setFont(SWTResourceManager.getFont("Tahoma", 10, SWT.NORMAL));
+		calculateStringStyledText.setBounds(38, 148, 389, 54);
 
 		final CLabel browseToALabel_1 = new CLabel(calculateInputGroup, SWT.NONE);
 		browseToALabel_1.setFont(SWTResourceManager.getFont("Arial Unicode MS", 10, SWT.NONE));
 		browseToALabel_1.setBounds(38, 122, 242, 20);
 		browseToALabel_1.setText("Or, Type in a string of characters");
 
-		calculateBrowseStyledText = new StyledText(calculateInputGroup, SWT.BORDER);
-		calculateBrowseStyledText.setBounds(38, 88, 337, 21);
+		calculateBrowseStyledText = new Text(calculateInputGroup, SWT.BORDER);
+		calculateBrowseStyledText.setFont(SWTResourceManager.getFont("Tahoma", 10, SWT.NORMAL));
+		calculateBrowseStyledText.setBounds(38, 88, 392, 25);
 
 		final Button calculateBrowseButton = new Button(calculateInputGroup, SWT.NONE);
 		calculateBrowseButton.addSelectionListener(new SelectionAdapter() {
@@ -563,7 +619,7 @@ public class APMD5 {
 				}
 			}
 		});
-		calculateBrowseButton.setBounds(381, 89, 75, 20);
+		calculateBrowseButton.setBounds(437, 88, 75, 25);
 		calculateBrowseButton.setText("Browse");
 
 		final CLabel browseToALabel = new CLabel(calculateInputGroup, SWT.NONE);
@@ -586,17 +642,25 @@ public class APMD5 {
 		recurseDirectoriesButton.setBounds(341, 20, 115, 16);
 
 		createFileButton = new Button(calculateInputGroup, SWT.CHECK);
-		createFileButton.setBounds(341, 42, 115, 16);
+		createFileButton.setBounds(341, 42, 115, 25);
 		createFileButton.setToolTipText("Create a file of the generated checksums with checksum and file name.");
 		createFileButton.setText("Create a file?");
-
-		final Group calculateOutputGroup = new Group(composite_1, SWT.NONE);
-		calculateOutputGroup.setBounds(10, 316, 525, 181);
-		calculateOutputGroup.setText("Calculate Result");
-
-		caculateResultStyledText = new StyledText(calculateOutputGroup, SWT.V_SCROLL | SWT.BORDER);
-		caculateResultStyledText.setFont(SWTResourceManager.getFont("Courier New", 10, SWT.NONE));
-		caculateResultStyledText.setBounds(10, 22, 505, 149);
+		
+				final Group calculateOutputGroup = new Group(calculateTabComposite, SWT.NONE);
+				FillLayout fillLayout = new FillLayout(SWT.HORIZONTAL);
+				fillLayout.marginWidth = 4;
+				fillLayout.marginHeight = 4;
+				calculateOutputGroup.setLayout(fillLayout);
+				FormData formData_1 = new FormData();
+				formData_1.top = new FormAttachment(calculateInputGroup, 6);
+				formData_1.right = new FormAttachment(calculateInputGroup, 0, SWT.RIGHT);
+				formData_1.left = new FormAttachment(0, 10);
+				formData_1.bottom = new FormAttachment(100, -10);
+				calculateOutputGroup.setLayoutData(formData_1);
+				calculateOutputGroup.setText("Calculate Result");
+				
+						caculateResultStyledText = new Text(calculateOutputGroup, SWT.V_SCROLL | SWT.BORDER);
+						caculateResultStyledText.setFont(SWTResourceManager.getFont("Courier New", 10, SWT.NONE));
 		statusBarComposite = new Composite(shell, SWT.NONE);
 		statusBarComposite.setLayout(new FormLayout());
 		final FormData fd_statusBarComposite = new FormData();
@@ -624,8 +688,10 @@ public class APMD5 {
 		//
 	}
 	
-	public void setStatusIcon(boolean success){
-		if(success){
+	public void setStatusIcon(Boolean success){
+		if(success == null){
+			testStatusIcon.setVisible(false);
+		} else if(success){
 			GUIUtil.setImage(testStatusIcon, CHECK_IMAGE);
 		} else {
 			GUIUtil.setImage(testStatusIcon, X_IMAGE);
@@ -641,5 +707,13 @@ public class APMD5 {
 		}
 		
 		return checksumCalculator;
+	}
+	
+	private void checkLastRun(){
+		if(errorLastRun){
+			ErrorLastRunDialog dialog = new ErrorLastRunDialog(shell, SWT.NONE, MD5Constants.errorLastRunStackTrace);
+			dialog.open();
+			errorLastRun = false;
+		}
 	}
 }

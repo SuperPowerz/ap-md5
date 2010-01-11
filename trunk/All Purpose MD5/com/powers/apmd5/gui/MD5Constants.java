@@ -20,7 +20,7 @@ or go to http://www.gnu.org/licenses/gpl.html.
 
 */
 
-package com.powers.apmd5.util;
+package com.powers.apmd5.gui;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -40,14 +40,22 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 
+import com.powers.apmd5.util.SimpleIO;
+import com.powers.apmd5.util.StringUtil;
+
 public class MD5Constants {
+	
+	// final constants
+	public static final String STRING_COLLECTION_REGEX = "(\\[)(.*)(\\])";
 	public static final char NULL_CHAR = '\u0000';
 	
-	public static String HOME_DIR = System.getProperty("user.home");
-	public static String LOCAL_APP_DATA = System.getenv("LocalAppData");
-	public static String APP_DATA_SUB_DIR = "All Purpose MD5";
-	public static String WRITE_DIR = StringUtil.isEmpty(LOCAL_APP_DATA) ? StringUtil.EMPTY_STRING : (LOCAL_APP_DATA+File.separatorChar+APP_DATA_SUB_DIR);
+	public static final String HOME_DIR = System.getProperty("user.home");
+	public static final String LOCAL_APP_DATA = System.getenv("LocalAppData");
+	public static final String APP_DATA_SUB_DIR = "All Purpose MD5";
+	public static final String WRITE_DIR = StringUtil.isEmpty(LOCAL_APP_DATA) ? StringUtil.EMPTY_STRING : (LOCAL_APP_DATA+File.separatorChar+APP_DATA_SUB_DIR);
 	
+	
+	// changable constants
 	public static String MD5_EXT = ".md5";
 	public static String SHA_EXT = ".sha";
 	
@@ -57,22 +65,15 @@ public class MD5Constants {
 	public static String READ_ME_FILE = "properties/README";
 	
 	public static String LOG_FILE_NAME = "APMD5.log";
-	
-	public static boolean RECURSE_DIRECTORY = true;
-	
-	public static String DEFAULT_DIRECTORY = HOME_DIR;
-
 	public static List<String> REGEX_PATTERN_LIST = new ArrayList<String>();
-	
+
 	public static String README_FILE_NAME = "properties/README";
-	
 	public static String REGEX_DELIM = ":";
-	
-	public static String TIME_FORMAT = "mm:ss:SS";
-	public static String TIME_FORMAT_SHORT = "ss:SS";
-	public static String TIME_FORMAT_START_END = "hh:mm:ss:SS";
-	
 	public static String MD5_SPACER = " ";
+	
+	public static String ISSUE_URL = "http://code.google.com/p/ap-md5/issues/entry";
+	public static String README_URL = "http://sites.google.com/site/allpurposemd5/readme";
+	public static String HOME_URL = "http://sites.google.com/site/allpurposemd5/home";
 	
 	// Other constants
 	public static String PROGRAM_NAME = "All Purpose MD5";
@@ -80,6 +81,12 @@ public class MD5Constants {
 	public static String VERSION = "2.0";
 	public static String WEBSITE = "http://code.google.com/p/ap-md5/";
 	
+	// Error Data
+	public static boolean errorLastRun;
+	public static String errorLastRunStackTrace;
+	
+	
+	// ========================= Methods ================================
 	public static String getFilePath(String path){
 		if(StringUtil.isEmpty(WRITE_DIR)) { return path; }
 		return WRITE_DIR+File.separator+path;
@@ -227,7 +234,7 @@ public class MD5Constants {
 					// Collection<String> OR Collection
 				} else {
 					Collection<String> c = (Collection) o;
-					c.add(value);
+					getCollectionFromString(c, value);
 				}
 				// END Collection code
 				
@@ -293,6 +300,25 @@ public class MD5Constants {
 		}
 	}
 	
+	private static Collection<String> getCollectionFromString(Collection<String> c, String value){
+		if(StringUtil.isEmpty(value)) { return c; }
+		
+		Pattern pattern = Pattern.compile(STRING_COLLECTION_REGEX);
+		Matcher matcher = pattern.matcher(value);
+		
+		if(matcher.matches() && matcher.groupCount() > 1){
+			String v = matcher.group(2);
+			if(StringUtil.isNotEmpty(v)){
+				String[] split = v.split(",");
+				for(String s : split){
+					c.add(StringUtil.trim(s));
+				}
+			}
+		}
+		
+		return c;
+	}
+	
 	private static String getGenericTypeFromCollection(Field field){
 		String str = "";
 		try {
@@ -328,7 +354,7 @@ public class MD5Constants {
 		return l;
 	}
 	
-	@SuppressWarnings({ "unchecked", "unchecked" })
+	@SuppressWarnings("unchecked")
 	private static void putInMap(Field field, Map m, List<String> types, String value){
 		//String type;
 		
