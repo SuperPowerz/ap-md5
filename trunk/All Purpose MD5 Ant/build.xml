@@ -26,10 +26,10 @@
 	
   <!-- other values -->
   <property name="program.name" value="apmd5"/>
-  <property name="ver" value="1.2" />
+  <property name="ver" value="2.0" />
 
   <!-- IzPack Variables -->
-  <property name="iz.base.dir" location="C:\Program Files\IzPack"/>
+  <property name="iz.base.dir" location="D:\Program Files\IzPack"/>
   <property name="iz.dir" location="IzPack"/>
   <property name="iz.dist.dir" location="${iz.dir}/dist"/>
 	
@@ -65,6 +65,12 @@
   <target name="dist" depends="compile"
         description="generate the distribution" >
     	
+  	<!-- copy images folder into the build dir to access images by classpath -->
+  	<echo message="copying images to build dir"/>
+  	<copy todir="${build}/images">
+  		<fileset dir="${images.dir}"/>
+  	</copy>
+  	
     <!-- Jar everything in ${build} into the MyProject-${DSTAMP}.jar file -->
   	<echo message="Creating dist ${dist}"/>
     <jar jarfile="${dist}/APMD5.jar" manifest="${src}/MANIFEST.MF" basedir="${build}"/>
@@ -81,7 +87,7 @@
   	<copy todir="${dist}">
   	 <fileset dir="${src}">
   	 	<include name="**/properties/*.properties"/>
-  	 	<include name="**/properties/README"/>
+  	 	<!--<include name="**/properties/README"/>-->
   	 </fileset>
     </copy>
   	
@@ -89,15 +95,16 @@
   	<jar jarfile="${dist}/APMD5_properties.jar"	basedir="${dist}/properties"/>
   	
   	<!-- copy images directory -->
+  	<!--
   	<copy todir="${dist}/images">
   		<fileset dir="${images.dir}"/>
-  	</copy>
+  	</copy>-->
   	
   	<!-- copy gpl license and other text files -->
   	<copy todir="${dist}">
   		<fileset dir="${src}">
   			<include name="**/gpl.txt"/>
-  			<include name="**/install.txt"/>
+  			<!--<include name="**/install.txt"/>-->
   			<include name="**/info.txt"/>
   		</fileset>
   	</copy>
@@ -114,11 +121,14 @@
   	<!-- Copy Source to src directory -->
   	<copy todir="${dist.src}">
   		<fileset dir="${src}">
+  			<include name="com.powers.apmd5/*"/>
+  			<include name="images/*.png"/>
   			<include name="**/com/swtdesigner/*.java"/>
+  			<!--
   			<include name="**/exceptions/*.java"/>
   			<include name="**/gui/*.java"/>
   			<include name="**/md5/*.java"/>
-  			<include name="**/util/*.java"/>
+  			<include name="**/util/*.java"/>-->
   		</fileset>
   	</copy>
   </target>
@@ -143,9 +153,9 @@
   <target name="generate.installer.worker">
 	
     <!-- Allows us to use the IzPack Ant task -->
-    <echo message="Defining a task name using ${iz.base.dir}/lib/compiler.jar"/>
+    <echo message="Defining a task name using ${iz.base.dir}/lib/standalone-compiler.jar"/>
     <taskdef name="izpack"
-	         classpath="${iz.base.dir}/lib/compiler.jar"
+	         classpath="${iz.base.dir}/lib/standalone-compiler.jar"
 	         classname="com.izforge.izpack.ant.IzPackTask" />        
 	
     <!-- Call the default build -->
@@ -153,11 +163,20 @@
 	
     <!-- Call IzPack -->
     <echo message="Makes the installer using IzPack" level="verbose" />
-    <izpack input="${iz.dir}\${installer.xmlfile}"
+  	
+  	<!--<izpack input="install-definition.xml"
+  	        output="${output.dir}/${product.short.name}-${product.version}-install.jar"
+  	        installerType="standard"
+  	        inheritAll="true"
+  	        basedir="${temp.dir}"
+  	        compression="deflate"
+  	        compressionlevel="9"-->
+    	
+    <izpack input="${iz.dir}/${installer.xmlfile}"
 	        output="${installer.name}${ver}.jar"
 	        installerType="standard"
 			basedir="${dist}"
-	    	izPackDir="${iz.base.dir}"/>
+	    	/>
   </target>
 	
 	<!--    compression="bzip2"
