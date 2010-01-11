@@ -72,14 +72,23 @@ public class SimpleIO {
 	 * @return
 	 */
 	public static BufferedReader openFileForInput(String filename){
-		if(filename == null){
-			return null;
-		}
+		if(filename == null){ return null; }
+		
+		return openFileForInput(new File(filename));
+	}
+	
+	/**
+	 * 
+	 * @param file
+	 * @return
+	 */
+	public static BufferedReader openFileForInput(File file){
+		if(file == null){ return null;}
 		
 		BufferedReader br = null;
 		
         try {
-			br = new BufferedReader(new FileReader(filename));
+			br = new BufferedReader(new FileReader(file));
 		} catch (FileNotFoundException e) {
 			return null;
 		}

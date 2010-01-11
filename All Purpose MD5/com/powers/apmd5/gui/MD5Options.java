@@ -22,10 +22,7 @@ or go to http://www.gnu.org/licenses/gpl.html.
 
 package com.powers.apmd5.gui;
 
-import static com.powers.apmd5.util.MD5Constants.DEFAULT_DIRECTORY;
-import static com.powers.apmd5.util.MD5Constants.PROPERTIES_FILE;
-import static com.powers.apmd5.util.MD5Constants.RECURSE_DIRECTORY;
-import static com.powers.apmd5.util.MD5Constants.getFilePath;
+import static com.powers.apmd5.gui.MD5Constants.*;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
@@ -41,7 +38,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import com.powers.apmd5.util.FileLogger;
-import com.powers.apmd5.util.MD5Constants;
 import com.powers.apmd5.util.ScreenLogger;
 import com.swtdesigner.SWTResourceManager;
 
@@ -120,8 +116,8 @@ public class MD5Options {
 			public void mouseUp(final MouseEvent e) {
 				
 				// Save to variables
-				DEFAULT_DIRECTORY = defaultDirectoryStyledText.getText();				
-				RECURSE_DIRECTORY = recurseDirectoriesButton.getSelection();
+//				DEFAULT_DIRECTORY = defaultDirectoryStyledText.getText();				
+//				RECURSE_DIRECTORY = recurseDirectoriesButton.getSelection();
 				
 				MD5Constants.saveOptions(getFilePath(PROPERTIES_FILE));
 
@@ -191,8 +187,8 @@ public class MD5Options {
 	}
 
 	private void setOptions(){
-		recurseDirectoriesButton.setSelection(RECURSE_DIRECTORY);
-		defaultDirectoryStyledText.setText(DEFAULT_DIRECTORY);
+//		recurseDirectoriesButton.setSelection(RECURSE_DIRECTORY);
+//		defaultDirectoryStyledText.setText(DEFAULT_DIRECTORY);
 	}
 
 }

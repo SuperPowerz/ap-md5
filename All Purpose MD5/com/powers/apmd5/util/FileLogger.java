@@ -26,12 +26,14 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Date;
 
+import static com.powers.apmd5.gui.MD5Constants.*;
+
 public class FileLogger {
 
 	//private PrintStream out = null;
 	private FileWriter fWriter = null;
 	private boolean isClosed = true;
-	private static final String DEFAULT_FILENAME = MD5Constants.LOG_FILE_NAME;
+	private static final String DEFAULT_FILENAME = getFilePath(LOG_FILE_NAME);
 	private String filename = null;
 	private final StringBuffer logBuffer = new StringBuffer();
 	private boolean willAppend = true;
