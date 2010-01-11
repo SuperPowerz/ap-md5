@@ -9,7 +9,6 @@ import static com.powers.apmd5.gui.MD5Constants.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -182,43 +181,7 @@ public class APMD5 {
 		if(!logFile.exists()){
 			logFile.createNewFile();
 		}
-		
-//		MessageBox mb = new MessageBox(shell, SWT.ICON_ERROR);
-//		mb.setText("Configuration File Error");
-//		
-//		if(!propFile.isDirectory()){
-//			if(propFile.isFile()){
-//				mb.setMessage("It would seem that the directory assigned to be able to be written to is actually a file.\n\n Exiting");
-//			} else {
-//				try {
-//					propFile.createNewFile();
-//				} catch (IOException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//			}
-//			
-//		}
 	}
-	
-//	private boolean createDirectories(File file){
-//		String path = file.getAbsolutePath();
-//		String[] split = path.split(File.separator);
-//		if(split == null || split.length < 1){
-//			fLogger.log("Failed to create the proper directories");
-//			return false;
-//		}
-//		StringBuilder sb = new StringBuilder(split[0]);
-//		for(int i=1; i<split.length-1; i++){
-//			sb.append(split[i]);
-//			File f = new File(sb.toString());
-//			if(!f.exists()){
-//				f.createNewFile()
-//			}
-//		}
-//		
-//		return true;
-//	}
 	
 	/**
 	 * Create contents of the window
@@ -422,7 +385,6 @@ public class APMD5 {
 		testButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(final SelectionEvent e) {
 				
-				//TODO
 				testResultStyledText.setText(StringUtil.EMPTY_STRING);
 				setStatusIcon(null);
 				

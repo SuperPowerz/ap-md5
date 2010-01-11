@@ -129,9 +129,4 @@ public class SimpleIO {
 		return(file.exists());
 	}
 	
-	public static void blah(){
-		java.util.prefs.Preferences prefs;
-		System.out.println(System.getenv("CSIDL_COMMON_APPDATA"));
-	}
-	
 }
