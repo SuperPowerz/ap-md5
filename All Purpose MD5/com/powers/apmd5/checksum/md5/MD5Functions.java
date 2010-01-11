@@ -30,8 +30,8 @@ import java.io.UnsupportedEncodingException;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Display;
 
+import com.powers.apmd5.gui.MD5Constants;
 import com.powers.apmd5.util.FileLogger;
-import com.powers.apmd5.util.MD5Constants;
 import com.powers.apmd5.util.ScreenLogger;
 
 
