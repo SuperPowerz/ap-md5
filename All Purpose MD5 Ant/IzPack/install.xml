@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>
+<!DOCTYPE Library  SYSTEM "installer/installation.dtd">
+
 <installation version="1.0">
     <info>
         <appname>All Purpose MD5</appname>
@@ -54,12 +56,19 @@
     <packs>
         <pack name="Application" required="yes">
             <description>The Application</description>
-            <!--  <file src="images" targetdir="$INSTALL_PATH"/>-->
+            <file src="images" targetdir="$INSTALL_PATH"/>
             <file src="properties" targetdir="$INSTALL_PATH"/>
             <!--  <file src="exe" targetdir="$INSTALL_PATH"/>-->
             <file src="APMD5.jar" targetdir="$INSTALL_PATH"/>
-            <file src="APMD5_properties.jar" targetdir="$INSTALL_PATH"/>
-            <file src="swt.jar" targetdir="$INSTALL_PATH"/>
+            <!--<file src="APMD5_properties.jar" targetdir="$INSTALL_PATH"/>-->
+            
+            <!--  Unix/Linux Specific Files -->
+            <file src="linux/swt.jar" targetdir="$INSTALL_PATH" os="unix"/>
+            <file src="linux/apmd5.sh" targetdir="$INSTALL_PATH" os="unix"/>
+            
+            <!-- Windows Specific Files -->
+            <file src="windows/swt.jar" targetdir="$INSTALL_PATH" os="windows"/>
+            
             <file src="swt-awt-win32-3232.dll" targetdir="$INSTALL_PATH"/>
             <file src="swt-gdip-win32-3232.dll" targetdir="$INSTALL_PATH"/>
             <file src="swt-wgl-win32-3232.dll" targetdir="$INSTALL_PATH"/>

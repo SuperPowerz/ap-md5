@@ -10,7 +10,7 @@
 		commandLine=""
 		workingDirectory="$INSTALL_PATH"
 		description="This starts All Purpose MD5"
-		iconFile="$INSTALL_PATH\images\apmd5.ico"
+		iconFile="$INSTALL_PATH\images\checksum.ico"
 		iconIndex="0"
 		initialState="normal"
 		programGroup="yes"
