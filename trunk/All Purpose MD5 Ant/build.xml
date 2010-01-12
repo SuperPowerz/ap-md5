@@ -83,6 +83,20 @@
       </fileset>
     </copy>
   	
+  	<!-- Windows Specific Files -->
+    <copy todir="${dist}/">
+      <fileset dir="${dist.files}">
+        <include name="**/windows/*.jar"/>
+      </fileset>
+    </copy>
+        	
+    <!-- Linux Specific Files -->
+    <copy todir="${dist}/">
+      <fileset dir="${dist.files}">
+        <include name="**/linux/*.*"/>
+      </fileset>
+    </copy>
+  	
   	<!-- copy properties files -->
   	<copy todir="${dist}">
   	 <fileset dir="${src}">
@@ -92,13 +106,15 @@
     </copy>
   	
   	<!-- create properties jar -->
-  	<jar jarfile="${dist}/APMD5_properties.jar"	basedir="${dist}/properties"/>
+  	<!--<jar jarfile="${dist}/APMD5_properties.jar"	basedir="${dist}/properties"/>-->
   	
   	<!-- copy images directory -->
-  	<!--
   	<copy todir="${dist}/images">
-  		<fileset dir="${images.dir}"/>
-  	</copy>-->
+  		<fileset dir="${images.dir}">
+	  		<include name="**/*.ico"/>
+	  		<include name="**/checksum.png"/>
+  		</fileset>
+  	</copy>
   	
   	<!-- copy gpl license and other text files -->
   	<copy todir="${dist}">
