@@ -80,7 +80,7 @@ public class MD5ReadPanel {
 	 */
 	protected void createContents() {
 		shell = new Shell();
-		shell.setImage(SWTResourceManager.getImage(APMD5.class, "/images/apmd5.ico"));
+		shell.setImage(SWTResourceManager.getImage(APMD5.class, "/images/checksum.ico"));
 		shell.setLayout(new FillLayout());
 		shell.setSize(766, 526);
 
