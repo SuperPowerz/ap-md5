@@ -143,8 +143,14 @@ public class APMD5 {
         	// Setup the file logger to log errors
         	fLogger = new FileLogger();
         	
-        	
-        	checkIfWritableFoldersExist();
+        	try {
+        		checkIfWritableFoldersExist();
+        	} catch(Exception e){
+        		MessageBox mb = new MessageBox(shell, SWT.ICON_ERROR);
+        		mb.setText("Configuration File Error");
+        		mb.setMessage("I failed to locate and create the proper configuration files. Please redownload the application and reinstall! Stacktrace: \n\n"+GUIUtil.getStackTrace(e));
+        		mb.open();
+        	}
         	
         	MD5Constants.loadOptions(getFilePath(PROPERTIES_FILE));
         	
@@ -171,15 +177,32 @@ public class APMD5 {
 		// check properties file
 		String propPath = getFilePath(PROPERTIES_FILE);
 		File propFile = new File(propPath);
+		boolean status;
 		if(!propFile.exists()){
-			propFile.createNewFile();
+			fLogger.log("file "+propFile.getAbsolutePath()+" does not exist, attempting to create it.");
+			status = propFile.getParentFile().mkdirs();
+			status = status && (status = propFile.createNewFile());
+			if(status){
+				fLogger.log("successfully created file "+propFile.getAbsolutePath());
+			} else {
+				fLogger.log("failed to create file "+propFile.getAbsolutePath());
+				throw new IOException("failed to create file "+propFile.getAbsolutePath());
+			}
 		}
 		
 		// check log file
 		String logPath = getFilePath(LOG_FILE_NAME);
 		File logFile = new File(logPath);
 		if(!logFile.exists()){
-			logFile.createNewFile();
+			fLogger.log("file "+logFile.getAbsolutePath()+" does not exist, attempting to create it.");
+			status = logFile.getParentFile().mkdirs();
+			status = status && (status = logFile.createNewFile());
+			if(status){
+				fLogger.log("successfully created file "+logFile.getAbsolutePath());
+			} else {
+				fLogger.log("failed to create file "+logFile.getAbsolutePath());
+				throw new IOException("failed to create file "+logFile.getAbsolutePath());
+			}
 		}
 	}
 	
@@ -188,7 +211,7 @@ public class APMD5 {
 	 */
 	protected void createContents() {
 		shell = new Shell();
-		shell.setImage(SWTResourceManager.getImage(APMD5.class, "/images/apmd5.ico"));
+		shell.setImage(SWTResourceManager.getImage(APMD5.class, "/images/checksum.ico"));
 		shell.setLayout(new FormLayout());
 		shell.setSize(555, 605);
 		shell.setText("All Purpose MD5");
