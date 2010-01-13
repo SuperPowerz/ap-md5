@@ -1,3 +1,24 @@
+/*
+
+All Purpose MD5 is a simple, fast, and easy-to-use GUI for calculating and testing MD5s.
+Copyright (C) 2006  Nick Powers
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+or go to http://www.gnu.org/licenses/gpl.html.
+
+*/
 package com.powers.apmd5.gui;
 
 
@@ -50,11 +71,17 @@ import com.powers.apmd5.util.FileLogger;
 import com.powers.apmd5.util.GUIUtil;
 import com.powers.apmd5.util.ScreenLogger;
 import com.powers.apmd5.util.StringUtil;
+import com.powers.apmd5.util.SystemOutLogger;
 import com.swtdesigner.SWTResourceManager;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.RowLayout;
+import org.eclipse.swt.layout.GridLayout;
 
 public class APMD5 {
 
+	public static boolean DEBUG = false;
+	private static SHA Sha = new SHA();
+	
 	private Label fileToBeTestedHelpLabel_3;
 	private Label chooseAFileDirHelpLabel;
 	private Label fileToBeTestedHelpLabel_1;
@@ -109,7 +136,25 @@ public class APMD5 {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		
+		for(String arg : args){
+			SystemOutLogger.debug("Argument: "+arg);
+			if(equalIgnoreCase(DEBUG_ARG,trim(arg))){
+				DEBUG = true;
+			}
+		}
+		
+		SystemOutLogger.debug("Staring application (main)\n");
+		SystemOutLogger.debug("Current Workign Directory: "+CWD);
+		SystemOutLogger.debug("Home Directory: "+HOME_DIR);
+		SystemOutLogger.debug("Local Application Data Directory: "+LOCAL_APP_DATA);
+		SystemOutLogger.debug("Wireable Directory: "+WRITE_DIR+"\n");
+		
+		SystemOutLogger.debug("Error Last Run? "+errorLastRun);
+		SystemOutLogger.debug("Error Last Run Stacktrace "+errorLastRunStackTrace+"\n");
+		
 		try {
+			SystemOutLogger.debug("Creating instance of APMD5()");
 			APMD5 window = new APMD5();
 			window.createAndShowGUI();
 			//window.open();
@@ -126,6 +171,7 @@ public class APMD5 {
 		createContents();
 		shell.open();
 		shell.layout();
+		SystemOutLogger.debug("Shell opened and layout called");
 	}
 
 	public void runInputLoop(){
@@ -137,11 +183,11 @@ public class APMD5 {
 	
 	public void createAndShowGUI(){
 		try {
+			
+			
         	open();
-        	// Setup the screen logger, status bar at bottom of page
-        	sLogger = new ScreenLogger(messageStyledText, display);
-        	// Setup the file logger to log errors
-        	fLogger = new FileLogger();
+        	
+        	SystemOutLogger.debug("Checking if the proper config folders/files exist");
         	
         	try {
         		checkIfWritableFoldersExist();
@@ -152,7 +198,17 @@ public class APMD5 {
         		mb.open();
         	}
         	
+        	SystemOutLogger.debug("Setting up logging");
+        	// Setup the screen logger, status bar at bottom of page
+        	sLogger = new ScreenLogger(messageStyledText, display);
+        	SystemOutLogger.debug("Screen logger done.");
+        	// Setup the file logger to log errors
+        	fLogger = new FileLogger();
+        	SystemOutLogger.debug("File logger done.");
+
+        	SystemOutLogger.debug("Loading options...");
         	MD5Constants.loadOptions(getFilePath(PROPERTIES_FILE));
+        	SystemOutLogger.debug("Done loading options.");
         	
         	progressBarWorker = new IndeterminentProgressBar(shell, progressBar, isExecuting);
         	
@@ -178,30 +234,50 @@ public class APMD5 {
 		String propPath = getFilePath(PROPERTIES_FILE);
 		File propFile = new File(propPath);
 		boolean status;
+		SystemOutLogger.debug("Property file location: "+propFile);
+		
 		if(!propFile.exists()){
-			fLogger.log("file "+propFile.getAbsolutePath()+" does not exist, attempting to create it.");
+			SystemOutLogger.log("File "+propFile.getAbsolutePath()+" does not exist, attempting to create it.");
 			status = propFile.getParentFile().mkdirs();
+			SystemOutLogger.log("Status of making directories: "+status);
 			status = status && (status = propFile.createNewFile());
+			SystemOutLogger.log("Status of creating a new file: "+status);
+			
 			if(status){
-				fLogger.log("successfully created file "+propFile.getAbsolutePath());
+				SystemOutLogger.log("Successfully created file "+propFile.getAbsolutePath());
 			} else {
-				fLogger.log("failed to create file "+propFile.getAbsolutePath());
-				throw new IOException("failed to create file "+propFile.getAbsolutePath());
+				SystemOutLogger.log("Failed to create file "+propFile.getAbsolutePath());
+				throw new IOException("Failed to create file "+propFile.getAbsolutePath());
 			}
+		} else {
+			SystemOutLogger.debug("Property file is fine.");
 		}
 		
 		// check log file
 		String logPath = getFilePath(LOG_FILE_NAME);
 		File logFile = new File(logPath);
-		if(!logFile.exists()){
-			fLogger.log("file "+logFile.getAbsolutePath()+" does not exist, attempting to create it.");
-			status = logFile.getParentFile().mkdirs();
-			status = status && (status = logFile.createNewFile());
-			if(status){
-				fLogger.log("successfully created file "+logFile.getAbsolutePath());
+		
+		SystemOutLogger.debug("Log file: "+logFile);
+		
+		File parent = logFile.getParentFile();
+		SystemOutLogger.debug("Parent file: "+parent);
+		
+		if(parent == null){
+			SystemOutLogger.debug("Parent file is null, this may be a problem!");
+		} else {
+		
+			if(!parent.exists()){
+				SystemOutLogger.log("Logfile path '"+parent.getAbsolutePath()+"' does not exist, attempting to create it.");
+				status = parent.mkdirs();
+				SystemOutLogger.log("Status of making directories: "+status);
+				if(status){
+					SystemOutLogger.log("Successfully created directory "+parent.getAbsolutePath());
+				} else {
+					SystemOutLogger.log("Failed to create directory "+parent.getAbsolutePath());
+					throw new IOException("Failed to create directory "+parent.getAbsolutePath());
+				}
 			} else {
-				fLogger.log("failed to create file "+logFile.getAbsolutePath());
-				throw new IOException("failed to create file "+logFile.getAbsolutePath());
+				SystemOutLogger.debug("Log file parent directory is fine.");
 			}
 		}
 	}
@@ -210,6 +286,7 @@ public class APMD5 {
 	 * Create contents of the window
 	 */
 	protected void createContents() {
+		SystemOutLogger.debug("Creating contents...");
 		shell = new Shell();
 		shell.setImage(SWTResourceManager.getImage(APMD5.class, "/images/checksum.ico"));
 		shell.setLayout(new FormLayout());
@@ -218,8 +295,13 @@ public class APMD5 {
 		shell.addDisposeListener(new DisposeListener() {
 			public void widgetDisposed(final DisposeEvent e) {
 
+				SystemOutLogger.debug("Shutting down...");
+				SystemOutLogger.debug("Saving options...");
 				saveOptions(getFilePath(PROPERTIES_FILE));
+				SystemOutLogger.debug("Options Saved.");
+				SystemOutLogger.debug("Calling shutdown now...");
 				threadPool.shutdownNow();
+				SystemOutLogger.debug("Application Terminated.");
 				
 			}
 		});
@@ -324,8 +406,9 @@ public class APMD5 {
 
 		final CLabel calculateAMd5Label_1 = new CLabel(testTabComposite, SWT.NONE);
 		FormData formData_5 = new FormData();
+		formData_5.right = new FormAttachment(0, 476);
 		formData_5.top = new FormAttachment(0);
-		formData_5.left = new FormAttachment(0, 118);
+		formData_5.left = new FormAttachment(0, 88);
 		calculateAMd5Label_1.setLayoutData(formData_5);
 		calculateAMd5Label_1.setFont(SWTResourceManager.getFont("Arial Unicode MS", 16, SWT.NONE));
 		calculateAMd5Label_1.setText("Test a File Against a Checksum");
@@ -335,26 +418,6 @@ public class APMD5 {
 		formData_4.left = new FormAttachment(0, 10);
 		testInputGroup.setLayoutData(formData_4);
 		testInputGroup.setText("Test Input");
-
-		fileToBeTestedHelpLabel = new Label(testInputGroup, SWT.NONE);
-		fileToBeTestedHelpLabel.setToolTipText("Choose a file for which you wish to calculate a checksum. \r\nThe resulting checksum will be tested against either a checksum file\r\n or a checksum you paste below.");
-		fileToBeTestedHelpLabel.setImage(SWTResourceManager.getImage(APMD5.class, "/images/question-16.png"));
-		fileToBeTestedHelpLabel.setBounds(140, 29, 16, 16);
-
-		checkSumStringHelpLabel = new Label(testInputGroup, SWT.NONE);
-		checkSumStringHelpLabel.setToolTipText("You may paste or type in a checksum to be tested against\n the generated checksum from the \"File to be Tested\" above.");
-		checkSumStringHelpLabel.setImage(SWTResourceManager.getImage(APMD5.class, "/images/question-16.png"));
-		checkSumStringHelpLabel.setBounds(231, 150, 16, 16);
-
-		checkSumFileHelpLabel = new Label(testInputGroup, SWT.NONE);
-		checkSumFileHelpLabel.setToolTipText("You may choose a text file that includes a checksum.\r\nThat file will be opened and read and tested against\r\nthe file chosen above.");
-		checkSumFileHelpLabel.setImage(SWTResourceManager.getImage(APMD5.class, "/images/question-16.png"));
-		checkSumFileHelpLabel.setBounds(130, 91, 16, 16);
-
-		final CLabel browseToALabel_4 = new CLabel(testInputGroup, SWT.NONE);
-		browseToALabel_4.setFont(SWTResourceManager.getFont("Arial Unicode MS", 10, SWT.NONE));
-		browseToALabel_4.setBounds(36, 23, 185, 20);
-		browseToALabel_4.setText("File to be Tested");
 
 		testFileToBeTestedStyledText = new Text(testInputGroup, SWT.BORDER);
 		testFileToBeTestedStyledText.setFont(SWTResourceManager.getFont("Tahoma", 10, SWT.NORMAL));
@@ -377,11 +440,6 @@ public class APMD5 {
 		testMd5FileStyledText.setFont(SWTResourceManager.getFont("Tahoma", 10, SWT.NORMAL));
 		testMd5FileStyledText.setBounds(38, 112, 396, 25);
 
-		final CLabel browseToALabel_4_1 = new CLabel(testInputGroup, SWT.NONE);
-		browseToALabel_4_1.setFont(SWTResourceManager.getFont("Arial Unicode MS", 10, SWT.NONE));
-		browseToALabel_4_1.setBounds(38, 86, 185, 20);
-		browseToALabel_4_1.setText("Checksum File");
-
 		final Button testMd5FileBrowseButton = new Button(testInputGroup, SWT.NONE);
 		testMd5FileBrowseButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(final SelectionEvent e) {
@@ -399,14 +457,16 @@ public class APMD5 {
 		testPasteTypeMd5styledText.setFont(SWTResourceManager.getFont("Tahoma", 10, SWT.NORMAL));
 		testPasteTypeMd5styledText.setBounds(38, 170, 396, 45);
 
-		final CLabel browseToALabel_4_1_1 = new CLabel(testInputGroup, SWT.NONE);
-		browseToALabel_4_1_1.setFont(SWTResourceManager.getFont("Arial Unicode MS", 10, SWT.NONE));
-		browseToALabel_4_1_1.setBounds(36, 146, 211, 20);
-		browseToALabel_4_1_1.setText("Or, Paste or type the Checksum");
-
 		testButton = new Button(testInputGroup, SWT.NONE);
 		testButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(final SelectionEvent e) {
+				
+				if(isExecuting.get()){
+					sLogger.logAppend(" (can't stop now)");
+					return;
+				}
+				
+				SystemOutLogger.debug("Testing a checksum...");
 				
 				testResultStyledText.setText(StringUtil.EMPTY_STRING);
 				setStatusIcon(null);
@@ -436,6 +496,8 @@ public class APMD5 {
 				
 				threadPool.submit(progressBarWorker);
 				
+				SystemOutLogger.debug("Checksum Type:"+getChecksumCalculator());
+				
 				TestAChecksum worker = null;
 				if(isNotEmpty(checksumFilePath)){
 					worker = new TestAChecksum(apmd5, getChecksumCalculator(), fileToBeTested, new File(checksumFilePath));
@@ -456,6 +518,42 @@ public class APMD5 {
 		final Group testResultGroup = new Group(testTabComposite, SWT.NONE);
 		formData_4.right = new FormAttachment(testResultGroup, 0, SWT.RIGHT);
 		formData_4.bottom = new FormAttachment(testResultGroup, -6);
+		
+		Composite composite = new Composite(testInputGroup, SWT.NONE);
+		composite.setBounds(38, 143, 396, 25);
+		composite.setLayout(new RowLayout(SWT.HORIZONTAL));
+		
+				final CLabel browseToALabel_4_1_1 = new CLabel(composite, SWT.NONE);
+				browseToALabel_4_1_1.setFont(SWTResourceManager.getFont("Arial Unicode MS", 10, SWT.NONE));
+				browseToALabel_4_1_1.setText("Or, Paste or type the Checksum");
+				
+						checkSumStringHelpLabel = new Label(composite, SWT.NONE);
+						checkSumStringHelpLabel.setToolTipText("You may paste or type in a checksum to be tested against\n the generated checksum from the \"File to be Tested\" above.");
+						checkSumStringHelpLabel.setImage(SWTResourceManager.getImage(APMD5.class, "/images/question-16.png"));
+						
+						Composite composite_1 = new Composite(testInputGroup, SWT.NONE);
+						composite_1.setBounds(38, 81, 396, 25);
+						composite_1.setLayout(new RowLayout(SWT.HORIZONTAL));
+						
+								final CLabel browseToALabel_4_1 = new CLabel(composite_1, SWT.NONE);
+								browseToALabel_4_1.setFont(SWTResourceManager.getFont("Arial Unicode MS", 10, SWT.NONE));
+								browseToALabel_4_1.setText("Checksum File");
+								
+										checkSumFileHelpLabel = new Label(composite_1, SWT.NONE);
+										checkSumFileHelpLabel.setToolTipText("You may choose a text file that includes a checksum.\r\nThat file will be opened and read and tested against\r\nthe file chosen above.");
+										checkSumFileHelpLabel.setImage(SWTResourceManager.getImage(APMD5.class, "/images/question-16.png"));
+										
+										Composite composite_2 = new Composite(testInputGroup, SWT.NONE);
+										composite_2.setBounds(38, 22, 396, 25);
+										composite_2.setLayout(new RowLayout(SWT.HORIZONTAL));
+										
+												final CLabel browseToALabel_4 = new CLabel(composite_2, SWT.NONE);
+												browseToALabel_4.setFont(SWTResourceManager.getFont("Arial Unicode MS", 10, SWT.NONE));
+												browseToALabel_4.setText("File to be Tested");
+												
+														fileToBeTestedHelpLabel = new Label(composite_2, SWT.NONE);
+														fileToBeTestedHelpLabel.setToolTipText("Choose a file for which you wish to calculate a checksum. \r\nThe resulting checksum will be tested against either a checksum file\r\n or a checksum you paste below.");
+														fileToBeTestedHelpLabel.setImage(SWTResourceManager.getImage(APMD5.class, "/images/question-16.png"));
 		FormData formData_3 = new FormData();
 		formData_3.top = new FormAttachment(0, 320);
 		formData_3.bottom = new FormAttachment(100, -10);
@@ -482,38 +580,26 @@ public class APMD5 {
 		FormData formData_2 = new FormData();
 		formData_2.top = new FormAttachment(0);
 		formData_2.left = new FormAttachment(0, 157);
-		formData_2.right = new FormAttachment(100, -157);
+		formData_2.right = new FormAttachment(100, -78);
 		calculateAMd5Label.setLayoutData(formData_2);
 		calculateAMd5Label.setFont(SWTResourceManager.getFont("Arial Unicode MS", 16, SWT.NONE));
 		calculateAMd5Label.setText("Calculate A Checksum");
 
 		calculateInputGroup = new Group(calculateTabComposite, SWT.NONE);
-		formData_2.bottom = new FormAttachment(calculateInputGroup, -6);
 		FormData formData = new FormData();
-		formData.right = new FormAttachment(100, -14);
 		formData.left = new FormAttachment(0, 10);
-		formData.top = new FormAttachment(0, 40);
 		calculateInputGroup.setLayoutData(formData);
 		calculateInputGroup.setText("Calculate Input");
-
-		fileToBeTestedHelpLabel_3 = new Label(calculateInputGroup, SWT.NONE);
-		fileToBeTestedHelpLabel_3.setImage(SWTResourceManager.getImage(APMD5.class, "/images/question-16.png"));
-		fileToBeTestedHelpLabel_3.setBounds(239, 126, 16, 16);
-		fileToBeTestedHelpLabel_3.setToolTipText("Type in a string in order to get a checksum for it.\n This is useful for getting a hash of a password for testing or storage.");
-
-		chooseAFileDirHelpLabel = new Label(calculateInputGroup, SWT.NONE);
-		chooseAFileDirHelpLabel.setImage(SWTResourceManager.getImage(APMD5.class, "/images/question-16.png"));
-		chooseAFileDirHelpLabel.setBounds(150, 37, 16, 16);
-		chooseAFileDirHelpLabel.setToolTipText("Choose either a file or a directory to calculate a checksum\nor a list of checksums (if a directory is chosen).");
-
-		fileToBeTestedHelpLabel_1 = new Label(calculateInputGroup, SWT.NONE);
-		fileToBeTestedHelpLabel_1.setImage(SWTResourceManager.getImage(APMD5.class, "/images/question-16.png"));
-		fileToBeTestedHelpLabel_1.setBounds(208, 66, 16, 16);
-		fileToBeTestedHelpLabel_1.setToolTipText("Select either a file or a directory. If a directory is chosen, consider recusivley \ncalculating checksums by checking the box to the right.");
 
 		calculateButton = new Button(calculateInputGroup, SWT.NONE);
 		calculateButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(final SelectionEvent e) {
+				
+				if(isExecuting.get()){
+					sLogger.logAppend(" (can't stop now)");
+					return;
+				}
+				
 				String calculateFileOrDirPath = trim(calculateBrowseStyledText.getText());
 				String string = trim(calculateStringStyledText.getText());
 				
@@ -530,6 +616,8 @@ public class APMD5 {
 					sLogger.logWarn("The file you chose does not exist");
 					return;
 				}
+				
+				SystemOutLogger.debug("Checksum Type:"+getChecksumCalculator());
 				
 				caculateResultStyledText.setText(""); // clear results
 				
@@ -570,21 +658,16 @@ public class APMD5 {
 
 			}
 		});
-		calculateButton.setBounds(175, 214, 115, 25);
+		calculateButton.setBounds(175, 225, 115, 25);
 		calculateButton.setText("Calculate");
 
 		calculateStringStyledText = new Text(calculateInputGroup, SWT.BORDER);
 		calculateStringStyledText.setFont(SWTResourceManager.getFont("Tahoma", 10, SWT.NORMAL));
-		calculateStringStyledText.setBounds(38, 148, 389, 54);
-
-		final CLabel browseToALabel_1 = new CLabel(calculateInputGroup, SWT.NONE);
-		browseToALabel_1.setFont(SWTResourceManager.getFont("Arial Unicode MS", 10, SWT.NONE));
-		browseToALabel_1.setBounds(38, 122, 242, 20);
-		browseToALabel_1.setText("Or, Type in a string of characters");
+		calculateStringStyledText.setBounds(41, 165, 389, 54);
 
 		calculateBrowseStyledText = new Text(calculateInputGroup, SWT.BORDER);
 		calculateBrowseStyledText.setFont(SWTResourceManager.getFont("Tahoma", 10, SWT.NORMAL));
-		calculateBrowseStyledText.setBounds(38, 88, 392, 25);
+		calculateBrowseStyledText.setBounds(41, 103, 392, 25);
 
 		final Button calculateBrowseButton = new Button(calculateInputGroup, SWT.NONE);
 		calculateBrowseButton.addSelectionListener(new SelectionAdapter() {
@@ -604,43 +687,76 @@ public class APMD5 {
 				}
 			}
 		});
-		calculateBrowseButton.setBounds(437, 88, 75, 25);
+		calculateBrowseButton.setBounds(439, 102, 75, 25);
 		calculateBrowseButton.setText("Browse");
-
-		final CLabel browseToALabel = new CLabel(calculateInputGroup, SWT.NONE);
-		browseToALabel.setFont(SWTResourceManager.getFont("Arial Unicode MS", 10, SWT.NONE));
-		browseToALabel.setBounds(38, 62, 185, 20);
-		browseToALabel.setText("Browse to a file or Directory");
-
-		chooseADirectoryRadioButton = new Button(calculateInputGroup, SWT.RADIO);
-		chooseADirectoryRadioButton.setBounds(38, 38, 120, 15);
-		chooseADirectoryRadioButton.setText("Choose a Directory");
-
-		chooseAFileRadioButton = new Button(calculateInputGroup, SWT.RADIO);
-		chooseAFileRadioButton.setSelection(true);
-		chooseAFileRadioButton.setBounds(38, 21, 120, 15);
-		chooseAFileRadioButton.setText("Choose a File");
-
-		recurseDirectoriesButton = new Button(calculateInputGroup, SWT.CHECK);
-		recurseDirectoriesButton.setToolTipText("Recursively look at each folder and calculate a checksum for every file.");
-		recurseDirectoriesButton.setText("Recurse Directories?");
-		recurseDirectoriesButton.setBounds(341, 20, 115, 16);
-
-		createFileButton = new Button(calculateInputGroup, SWT.CHECK);
-		createFileButton.setBounds(341, 42, 115, 25);
-		createFileButton.setToolTipText("Create a file of the generated checksums with checksum and file name.");
-		createFileButton.setText("Create a file?");
 		
 				final Group calculateOutputGroup = new Group(calculateTabComposite, SWT.NONE);
+				formData_2.bottom = new FormAttachment(calculateOutputGroup, -272);
+				formData.bottom = new FormAttachment(calculateOutputGroup, -6);
+				formData.right = new FormAttachment(calculateOutputGroup, 0, SWT.RIGHT);
 				FillLayout fillLayout = new FillLayout(SWT.HORIZONTAL);
 				fillLayout.marginWidth = 4;
 				fillLayout.marginHeight = 4;
 				calculateOutputGroup.setLayout(fillLayout);
 				FormData formData_1 = new FormData();
-				formData_1.top = new FormAttachment(calculateInputGroup, 6);
-				formData_1.right = new FormAttachment(calculateInputGroup, 0, SWT.RIGHT);
-				formData_1.left = new FormAttachment(0, 10);
 				formData_1.bottom = new FormAttachment(100, -10);
+				formData_1.top = new FormAttachment(0, 306);
+				formData_1.right = new FormAttachment(100, -14);
+				formData_1.left = new FormAttachment(0, 10);
+				
+				Composite composite_3 = new Composite(calculateInputGroup, SWT.NONE);
+				composite_3.setBounds(41, 135, 389, 25);
+				composite_3.setLayout(new RowLayout(SWT.HORIZONTAL));
+				
+						final CLabel browseToALabel_1 = new CLabel(composite_3, SWT.NONE);
+						browseToALabel_1.setFont(SWTResourceManager.getFont("Arial Unicode MS", 10, SWT.NONE));
+						browseToALabel_1.setText("Or, Type in a string of characters");
+						
+								fileToBeTestedHelpLabel_3 = new Label(composite_3, SWT.NONE);
+								fileToBeTestedHelpLabel_3.setImage(SWTResourceManager.getImage(APMD5.class, "/images/question-16.png"));
+								fileToBeTestedHelpLabel_3.setToolTipText("Type in a string in order to get a checksum for it.\n This is useful for getting a hash of a password for testing or storage.");
+								
+								Composite composite_4 = new Composite(calculateInputGroup, SWT.NONE);
+								composite_4.setBounds(41, 73, 389, 25);
+								composite_4.setLayout(new RowLayout(SWT.HORIZONTAL));
+								
+										final CLabel browseToALabel = new CLabel(composite_4, SWT.NONE);
+										browseToALabel.setFont(SWTResourceManager.getFont("Arial Unicode MS", 10, SWT.NONE));
+										browseToALabel.setText("Browse to a file or Directory");
+										
+												fileToBeTestedHelpLabel_1 = new Label(composite_4, SWT.NONE);
+												fileToBeTestedHelpLabel_1.setImage(SWTResourceManager.getImage(APMD5.class, "/images/question-16.png"));
+												fileToBeTestedHelpLabel_1.setToolTipText("Select either a file or a directory. If a directory is chosen, consider recusivley \ncalculating checksums by checking the box to the right.");
+												
+												Composite composite_5 = new Composite(calculateInputGroup, SWT.NONE);
+												composite_5.setBounds(41, 20, 389, 50);
+												composite_5.setLayout(new GridLayout(6, false));
+														
+																chooseAFileRadioButton = new Button(composite_5, SWT.RADIO);
+																chooseAFileRadioButton.setSelection(true);
+																chooseAFileRadioButton.setText("Choose a File");
+																				
+																						chooseAFileDirHelpLabel = new Label(composite_5, SWT.NONE);
+																						chooseAFileDirHelpLabel.setImage(SWTResourceManager.getImage(APMD5.class, "/images/question-16.png"));
+																						chooseAFileDirHelpLabel.setToolTipText("Choose either a file or a directory to calculate a checksum\nor a list of checksums (if a directory is chosen).");
+																				new Label(composite_5, SWT.NONE);
+																				new Label(composite_5, SWT.NONE);
+																				new Label(composite_5, SWT.NONE);
+																				
+																						recurseDirectoriesButton = new Button(composite_5, SWT.CHECK);
+																						recurseDirectoriesButton.setToolTipText("Recursively look at each folder and calculate a checksum for every file.");
+																						recurseDirectoriesButton.setText("Recurse Directories?");
+																		
+																				chooseADirectoryRadioButton = new Button(composite_5, SWT.RADIO);
+																				chooseADirectoryRadioButton.setText("Choose a Directory");
+																						new Label(composite_5, SWT.NONE);
+																								new Label(composite_5, SWT.NONE);
+																								new Label(composite_5, SWT.NONE);
+																								new Label(composite_5, SWT.NONE);
+																								
+																										createFileButton = new Button(composite_5, SWT.CHECK);
+																										createFileButton.setToolTipText("Create a file of the generated checksums with checksum and file name.");
+																										createFileButton.setText("Create a file?");
 				calculateOutputGroup.setLayoutData(formData_1);
 				calculateOutputGroup.setText("Calculate Result");
 				
@@ -686,7 +802,7 @@ public class APMD5 {
 	public ChecksumCalculator getChecksumCalculator(){
 
 		if(sha1MenuItem.getSelection() && checksumCalculator instanceof MD5){
-			checksumCalculator = new SHA();
+			checksumCalculator = Sha;
 		} else if(md5MenuItem.getSelection() && checksumCalculator instanceof SHA){
 			checksumCalculator = new MD5();
 		}

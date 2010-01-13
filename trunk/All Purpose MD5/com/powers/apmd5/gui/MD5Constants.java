@@ -46,10 +46,12 @@ import com.powers.apmd5.util.StringUtil;
 public class MD5Constants {
 	
 	// final constants
+	public static final String DEBUG_ARG = "-debug";
 	public static final String STRING_COLLECTION_REGEX = "(\\[)(.*)(\\])";
 	public static final char NULL_CHAR = '\u0000';
 	
 	public static final String HOME_DIR = System.getProperty("user.home");
+	public static final String CWD = System.getProperty("user.dir");
 	public static final String LOCAL_APP_DATA = System.getenv("LocalAppData");
 	public static final String APP_DATA_SUB_DIR = "All Purpose MD5";
 	public static final String WRITE_DIR = StringUtil.isEmpty(LOCAL_APP_DATA) ? StringUtil.EMPTY_STRING : (LOCAL_APP_DATA+File.separatorChar+APP_DATA_SUB_DIR);
