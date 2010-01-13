@@ -1,3 +1,24 @@
+/*
+
+All Purpose MD5 is a simple, fast, and easy-to-use GUI for calculating and testing MD5s.
+Copyright (C) 2006  Nick Powers
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+or go to http://www.gnu.org/licenses/gpl.html.
+
+*/
 package com.powers.apmd5.gui;
 
 import static com.powers.apmd5.gui.MD5Constants.*;
@@ -24,6 +45,7 @@ import com.powers.apmd5.exceptions.CanNotWriteToFileException;
 import com.powers.apmd5.util.GUIUtil;
 import com.powers.apmd5.util.SimpleIO;
 import com.powers.apmd5.util.StringUtil;
+import com.powers.apmd5.util.SystemOutLogger;
 
 public class GUIHelper {
 
@@ -71,26 +93,37 @@ public class GUIHelper {
 		public ChecksumTestResult call() throws Exception {
 
 			try {
-				GUIUtil.setEnabled(apmd5.display, apmd5.testButton, false);
+				SystemOutLogger.debug("Testing checksum...");
+				//GUIUtil.setEnabled(apmd5.display, apmd5.testButton, false);
 				
+				SystemOutLogger.debug("Calculating File-To-Be-Tested...");
 				String fileToBeTestedResult = checkSum.calculate(file);
+				SystemOutLogger.debug("Finished, result: "+fileToBeTestedResult);
+				
+				SystemOutLogger.debug("Calculating Other Checksum..");
 				String otherChecksum = StringUtil.EMPTY_STRING;
 				if (checksumFile == null) {
+					SystemOutLogger.debug("Other checksum is a String");
 					otherChecksum = str;
 				} else {
+					SystemOutLogger.debug("Other checksum is a File");
 					otherChecksum = getChecksumFromFile(checksumFile);
 				}
 				
+				SystemOutLogger.debug("Finished, result: "+otherChecksum);
+				
 				boolean matches = fileToBeTestedResult.equalsIgnoreCase(otherChecksum);
+				
 				return new ChecksumTestResult(fileToBeTestedResult, otherChecksum, matches, file.getName());
 			} finally {
-				GUIUtil.setEnabled(apmd5.display, apmd5.testButton, true);
+				//GUIUtil.setEnabled(apmd5.display, apmd5.testButton, true);
 			}
 		}
 		
 		private String getChecksumFromFile(File file){
 			final BufferedReader br = SimpleIO.openFileForInput(file);
 			
+			SystemOutLogger.debug("Getting checksum from a file...");
 			String line = null;
 			Pattern pattern = null;
 			Matcher matcher = null;
@@ -104,8 +137,10 @@ public class GUIHelper {
 								pattern = Pattern.compile(regex);
 								matcher = pattern.matcher(line);
 								
+								SystemOutLogger.debug("Regex: "+regex+" line: "+line);
 								if(matcher.matches()){
 									hash = matcher.group(1);
+									SystemOutLogger.debug("The regex matches the line, hash found: "+hash);
 									break;
 								}
 							}
@@ -220,13 +255,20 @@ public class GUIHelper {
 	
 			
 			try {
-				GUIUtil.setEnabled(apmd5.display, apmd5.calculateButton, false);
+				SystemOutLogger.debug("Calculating checksum...");
+				//GUIUtil.setEnabled(apmd5.display, apmd5.calculateButton, false);
+				
+				SystemOutLogger.debug("Write result to file? "+(toWrite != null));
 				
 	    		try {
 	    			if(toWrite != null) {
+	    				SystemOutLogger.debug("Opening file: "+toWrite.getAbsolutePath());
 	    				pw = SimpleIO.openFileForOutput(toWrite);
+	    				SystemOutLogger.debug("PrintWriter open result: "+pw);
+	    				
 	    			}
 	    		} catch (CanNotWriteToFileException ex){
+	    			SystemOutLogger.log("Can't write to file exception. Stacktrace:" +GUIUtil.getStackTrace(ex));
 	    			apmd5.sLogger.logError("Can not write to file " + toWrite.getName() +". Did not create checksum(s)");	
 	    			throw ex;
 	    		}
@@ -236,12 +278,18 @@ public class GUIHelper {
 				
 				String checksum = StringUtil.EMPTY_STRING;
 				if(file == null){
+					SystemOutLogger.debug("Calculating checksum for String: "+str);
 					checksum = checksumCalculator.calculate(str);
+					SystemOutLogger.debug("Finished, result: "+checksum);
+					
 					updateResult(checksum+ MD5Constants.MD5_SPACER +"("+str+")\n");
 					if(pw != null) { pw.println(checksum+ MD5Constants.MD5_SPACER +file.getName());}
 					
 				} else {
+					
+					SystemOutLogger.debug("Recurse flag set? "+recurse);
 					if(file.isDirectory()){
+						SystemOutLogger.debug("Calculating checksum for file(s) inside directory: "+file.getAbsolutePath());
 						if(recurse){
 							recurseDirectory(file, pw);
 						} else {
@@ -249,8 +297,10 @@ public class GUIHelper {
 						}
 						
 					} else {
+						SystemOutLogger.debug("Calculating checksum for file: "+file.getAbsolutePath());
 						updateStatus("Calculating checksum for "+file.getName()+"...");
 						checksum = checksumCalculator.calculate(file);
+						SystemOutLogger.debug("Finished, result: "+checksum);
 						updateResult(checksum+ MD5Constants.MD5_SPACER +"("+file.getName()+")\n");
 						if(pw != null) { pw.println(checksum+ MD5Constants.MD5_SPACER +file.getName());}
 					}
@@ -265,7 +315,7 @@ public class GUIHelper {
 				return result;
 			} finally {
 				SimpleIO.closeQuietly(pw);
-				GUIUtil.setEnabled(apmd5.display, apmd5.calculateButton, true);
+				//GUIUtil.setEnabled(apmd5.display, apmd5.calculateButton, true);
 				apmd5.isExecuting.set(false);
 			}
 		}
