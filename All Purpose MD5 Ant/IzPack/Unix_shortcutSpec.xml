@@ -2,7 +2,9 @@
 <shortcuts>
 
   <programGroup defaultName="All Purpose MD5" location="applications"/>
-
+  <skipIfNotSupported/> 
+  <programGroup defaultName="All Purpose MD5" location="applications"/>
+  
   <shortcut
      name="All Purpose MD5"
      programGroup="yes"
@@ -10,43 +12,41 @@
      applications="no"
      startMenu="yes"
      startup="no"
-     commandLine=""
-     workingDirectory="$INSTALL_PATH"
      description="All Purpose MD5"
      target="java" 
      commandLine="-jar &quot;$INSTALL_PATH/APMD5.jar&quot;"
-     iconFile="$INSTALL_PATH/images/checksum.png"
+     iconFile="&quot;$INSTALL_PATH/images/checksum.png&quot;"
      iconIndex="0"
      type="Application"
      encoding="UTF-8"
-     terminal="true"
      createForAll="true" 
      initialState="normal">
      
      <createForPack name="Application"/>
    </shortcut>
 
-	<!--      target="$INSTALL_PATH/apmd5.sh" -->
+	<!--workingDirectory="&quot;$INSTALL_PATH&quot;"      
+	target="$INSTALL_PATH/apmd5.sh" -->
 
    <shortcut
      name="All Purpose MD5 Uninstaller"
      programGroup="yes"
-     desktop="yes"
+     desktop="no"
      applications="no"
-     startMenu="no"
+     startMenu="yes"
      startup="no"
      target="java"
      commandLine="-jar &quot;$INSTALL_PATH/Uninstaller/uninstaller.jar&quot;"
      initialState="noShow"
-     iconFile="trashcan_full"
+     iconFile="trashcan_full" 
      iconIndex="0" 
      workingDirectory=""
      type="Application"
      encoding="UTF-8"
      createForAll="false"
      description="This uninstalls All Purpose MD5">
-
      <createForPack name="Application" />
    </shortcut>
 
+<!--      iconFile="trashcan_full" -->
 </shortcuts>

@@ -29,8 +29,8 @@
 		startMenu="no"
 		startup="no"
 		target="$INSTALL_PATH\Uninstaller\uninstaller.jar"
-		commandLine=""
-		iconFile="%SystemRoot%\system32\SHELL32.dll"
+		commandLine="" 
+		iconFile="%SystemRoot%\system32\SHELL32.dll" 
 		iconIndex="31"
 		description="This uninstalls All Purpose MD5">
 		<createForPack name="Application"/>

@@ -64,10 +64,11 @@
             
             <!--  Unix/Linux Specific Files -->
             <file src="linux/swt.jar" targetdir="$INSTALL_PATH" os="unix"/>
-            <file src="linux/apmd5.sh" targetdir="$INSTALL_PATH" os="unix"/>
+            <file src="linux/trashcan-full-icon-16.png" targetdir="$INSTALL_PATH" os="unix"/>
             
             <!-- Windows Specific Files -->
             <file src="windows/swt.jar" targetdir="$INSTALL_PATH" os="windows"/>
+            <file src="windows/trashcan-full.ico" targetdir="$INSTALL_PATH" os="windows"/>
             
             <file src="swt-awt-win32-3232.dll" targetdir="$INSTALL_PATH"/>
             <file src="swt-gdip-win32-3232.dll" targetdir="$INSTALL_PATH"/>
