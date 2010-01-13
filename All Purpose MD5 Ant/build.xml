@@ -86,7 +86,7 @@
   	<!-- Windows Specific Files -->
     <copy todir="${dist}/">
       <fileset dir="${dist.files}">
-        <include name="**/windows/*.jar"/>
+        <include name="**/windows/*.*"/>
       </fileset>
     </copy>
         	
