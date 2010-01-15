@@ -1,6 +1,25 @@
+<!--
+All Purpose MD5 is a simple, fast, and easy-to-use GUI for calculating and testing MD5s.
+Copyright (C) 2006  Nick Powers
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+or go to http://www.gnu.org/licenses/gpl.html.
+-->
 <!-- ====================================================== -->
 <!-- = Author: Nick Powers                                = -->
-<!-- = Last Updated: 8/17/2006                            = -->
+<!-- = Last Updated: 01/15/2010                           = -->
 <!-- = The default target build the APMD5 jar.            = -->
 <!-- = The generate-installer target generates the IzPack = -->
 <!-- = installer.                                         = -->
@@ -101,12 +120,8 @@
   	<copy todir="${dist}">
   	 <fileset dir="${src}">
   	 	<include name="**/properties/*.properties"/>
-  	 	<!--<include name="**/properties/README"/>-->
   	 </fileset>
     </copy>
-  	
-  	<!-- create properties jar -->
-  	<!--<jar jarfile="${dist}/APMD5_properties.jar"	basedir="${dist}/properties"/>-->
   	
   	<!-- copy images directory -->
   	<copy todir="${dist}/images">
@@ -120,8 +135,7 @@
   	<copy todir="${dist}">
   		<fileset dir="${src}">
   			<include name="**/gpl.txt"/>
-  			<!--<include name="**/install.txt"/>-->
-  			<include name="**/info.txt"/>
+  			<include name="**/info.html"/>
   		</fileset>
   	</copy>
   	
@@ -140,11 +154,6 @@
   			<include name="com.powers.apmd5/*"/>
   			<include name="images/*.png"/>
   			<include name="**/com/swtdesigner/*.java"/>
-  			<!--
-  			<include name="**/exceptions/*.java"/>
-  			<include name="**/gui/*.java"/>
-  			<include name="**/md5/*.java"/>
-  			<include name="**/util/*.java"/>-->
   		</fileset>
   	</copy>
   </target>
@@ -152,8 +161,7 @@
 <!-- =================================================== -->
 <!-- =      Clean Target - deletes directories         = -->
 <!-- =================================================== -->
-  <target name="clean"
-          description="clean up" >
+  <target name="clean" description="clean up" >
   	
     <!-- Delete the ${build} and ${dist} directory trees -->
     <delete dir="${build}"/>
@@ -179,14 +187,6 @@
 	
     <!-- Call IzPack -->
     <echo message="Makes the installer using IzPack" level="verbose" />
-  	
-  	<!--<izpack input="install-definition.xml"
-  	        output="${output.dir}/${product.short.name}-${product.version}-install.jar"
-  	        installerType="standard"
-  	        inheritAll="true"
-  	        basedir="${temp.dir}"
-  	        compression="deflate"
-  	        compressionlevel="9"-->
     	
     <izpack input="${iz.dir}/${installer.xmlfile}"
 	        output="${installer.name}${ver}.jar"
@@ -194,10 +194,6 @@
 			basedir="${dist}"
 	    	/>
   </target>
-	
-	<!--    compression="bzip2"
-	        compressionlevel="9" 
-	-->
 	
 <!-- =================================================== -->
 <!-- =     Creates a normal installer for IzPack       = -->
