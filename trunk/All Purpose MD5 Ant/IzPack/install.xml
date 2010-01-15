@@ -23,7 +23,7 @@
 
     <resources>
         <res id="LicencePanel.licence" src="gpl.txt"/>
-        <res id="InfoPanel.info" src="info.txt"/>
+        <res id="HTMLInfoPanel.info" src="info.html"/>
         
         <!-- Images -->
         <res src="../IzPack/images/core.png" id="ImgPacksPanel.img.0" />
@@ -45,7 +45,8 @@
     </resources>
     <panels>
         <panel classname="HelloPanel"/>
-        <panel classname="InfoPanel"/>
+        <!--  <panel classname="InfoPanel"/>-->
+        <panel classname="HTMLInfoPanel" />
         <panel classname="LicencePanel"/>
         <panel classname="TargetPanel"/> 
         <panel classname="PacksPanel"/>
