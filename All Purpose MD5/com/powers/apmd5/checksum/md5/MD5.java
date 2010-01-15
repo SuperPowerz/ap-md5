@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 
 import com.powers.apmd5.checksum.ChecksumCalculator;
+import com.powers.apmd5.gui.APMD5;
+import com.powers.apmd5.util.GUIUtil;
 import com.powers.apmd5.util.StringUtil;
 
 /*
@@ -112,7 +114,7 @@ public class MD5 implements ChecksumCalculator {
    * MD5 state
    */
   MD5State	state;
- 
+  
   /**
    * If Final() has been called, finals is set to the current finals
    * state. Any Update() causes this to be set to null.
@@ -839,6 +841,7 @@ public class MD5 implements ChecksumCalculator {
 		try {
 			return MD5.asHex(MD5.getHash(file));
 		} catch (final IOException e) {
+			APMD5.fLogger.log(GUIUtil.getStackTrace(e));
 			e.printStackTrace();
 			return StringUtil.EMPTY_STRING;
 		}
