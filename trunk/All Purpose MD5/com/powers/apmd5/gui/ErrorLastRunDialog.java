@@ -34,10 +34,12 @@ import org.eclipse.swt.events.SelectionEvent;
 
 import com.powers.apmd5.util.BareBonesBrowserLaunch;
 import com.powers.apmd5.util.GUIUtil;
+import com.powers.apmd5.util.StringUtil;
 import com.swtdesigner.SWTResourceManager;
 
 public class ErrorLastRunDialog extends Dialog {
 
+	private static final String FINISH = "Finish";
 	protected Object result;
 	protected Shell shell;
 	private Text stacktraceText;
@@ -65,7 +67,7 @@ public class ErrorLastRunDialog extends Dialog {
 		shell.open();
 		shell.layout();
 		
-		stacktraceText.setText(stacktraceTextStr);
+		stacktraceText.setText(StringUtil.defaultString(stacktraceTextStr));
 		
 		Display display = getParent().getDisplay();
 		while (!shell.isDisposed()) {
@@ -80,7 +82,7 @@ public class ErrorLastRunDialog extends Dialog {
 	 * Create contents of the dialog.
 	 */
 	private void createContents() {
-		shell = new Shell(getParent(), getStyle());
+		shell = new Shell(getParent(), SWT.DIALOG_TRIM);
 		shell.setImage(SWTResourceManager.getImage(ErrorLastRunDialog.class, "/images/mail.png"));
 		shell.setSize(450, 459);
 		shell.setText(getText());
@@ -106,18 +108,24 @@ public class ErrorLastRunDialog extends Dialog {
 		copyButton.setBounds(10, 314, 68, 23);
 		copyButton.setText("Copy");
 		
-		Button launchBrowserButton = new Button(shell, SWT.NONE);
+		final Button launchBrowserButton = new Button(shell, SWT.NONE);
 		launchBrowserButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				try {
-					BareBonesBrowserLaunch.openURL(MD5Constants.ISSUE_URL);
-				} catch (Exception e1) {
-					MessageBox mb = new MessageBox(parent);
-					mb.setText("Failure To Launch");
-					mb.setMessage("Unable to launch browser, please launch your browser manuallly");
-					mb.open();
-					e1.printStackTrace();
+				
+				if(FINISH.equals(launchBrowserButton.getText())){
+					shell.close();
+				} else {
+					try {
+						BareBonesBrowserLaunch.openURL(MD5Constants.ISSUE_URL);
+						launchBrowserButton.setText(FINISH);
+					} catch (Exception e1) {
+						MessageBox mb = new MessageBox(parent);
+						mb.setText("Failure To Launch");
+						mb.setMessage("Unable to launch browser, please launch your browser manuallly");
+						mb.open();
+						e1.printStackTrace();
+					}
 				}
 			}
 		});
@@ -125,6 +133,12 @@ public class ErrorLastRunDialog extends Dialog {
 		launchBrowserButton.setText("Launch Browser");
 		
 		Button noThanks = new Button(shell, SWT.NONE);
+		noThanks.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				shell.close();
+			}
+		});
 		noThanks.setBounds(210, 394, 87, 23);
 		noThanks.setText("No Thanks");
 

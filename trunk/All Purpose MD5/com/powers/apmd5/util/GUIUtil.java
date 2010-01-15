@@ -28,6 +28,8 @@ import java.io.Writer;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
@@ -38,6 +40,17 @@ import com.swtdesigner.SWTResourceManager;
 
 public class GUIUtil {
 
+	public static void center(Shell shell){
+		Rectangle parentSize = shell.getParent().getBounds();
+		Rectangle mySize = shell.getBounds();
+
+		int locationX, locationY;
+		locationX = (parentSize.width - mySize.width)/2+parentSize.x;
+		locationY = (parentSize.height - mySize.height)/2+parentSize.y;
+
+		shell.setLocation(new Point(locationX, locationY));
+	}
+	
 	public static void setImage(final Label l, final String url){
 		l.setImage(SWTResourceManager.getImage(GUIUtil.class, url));
 		l.setVisible(true);
@@ -84,5 +97,12 @@ public class GUIUtil {
 				mb.open();
 			}
 		});
+	}
+	
+	public static void setVisible(final Shell parent, final Control ctl, final boolean visible){
+		parent.getDisplay().syncExec(new Runnable() {
+			public void run() {
+				ctl.setVisible(visible);
+			}});
 	}
 }
