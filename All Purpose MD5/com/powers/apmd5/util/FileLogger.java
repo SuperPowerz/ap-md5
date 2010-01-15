@@ -30,7 +30,6 @@ import static com.powers.apmd5.gui.MD5Constants.*;
 
 public class FileLogger {
 
-	//private PrintStream out = null;
 	private FileWriter fWriter = null;
 	private boolean isClosed = true;
 	private static final String DEFAULT_FILENAME = getFilePath(LOG_FILE_NAME);

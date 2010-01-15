@@ -55,7 +55,7 @@ public class MD5Constants {
 	public static final String LOCAL_APP_DATA = System.getenv("LocalAppData");
 	public static final String APP_DATA_SUB_DIR = "All Purpose MD5";
 	public static final String WRITE_DIR = StringUtil.isEmpty(LOCAL_APP_DATA) ? StringUtil.EMPTY_STRING : (LOCAL_APP_DATA+File.separatorChar+APP_DATA_SUB_DIR);
-	
+	public static final String GPL_FILE = "gpl.txt";
 	
 	// changable constants
 	public static String MD5_EXT = ".md5";

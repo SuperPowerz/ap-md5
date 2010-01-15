@@ -22,6 +22,7 @@ or go to http://www.gnu.org/licenses/gpl.html.
 package com.powers.apmd5.gui;
 
 import static com.powers.apmd5.gui.MD5Constants.*;
+import static com.powers.apmd5.util.StringUtil.*;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -162,7 +163,7 @@ public class GUIHelper {
 					
 				} catch (final IOException e) {
 					apmd5.sLogger.logError("Unable to open MD5 file.  See log file for more info.");
-					apmd5.fLogger.log("Unable to open MD5 file. Error Message: " + e.getMessage());
+					APMD5.fLogger.log("Unable to open MD5 file. Error Message: " + e.getMessage());
 				}
 			} else { // br is null (can't open file)
 					apmd5.sLogger.logError("Unable to open file " + file.getName());
@@ -256,8 +257,6 @@ public class GUIHelper {
 			
 			try {
 				SystemOutLogger.debug("Calculating checksum...");
-				//GUIUtil.setEnabled(apmd5.display, apmd5.calculateButton, false);
-				
 				SystemOutLogger.debug("Write result to file? "+(toWrite != null));
 				
 	    		try {
@@ -315,8 +314,8 @@ public class GUIHelper {
 				return result;
 			} finally {
 				SimpleIO.closeQuietly(pw);
-				//GUIUtil.setEnabled(apmd5.display, apmd5.calculateButton, true);
 				apmd5.isExecuting.set(false);
+				GUIUtil.setVisible(apmd5.shell, apmd5.cancelButton, false);
 			}
 		}
 		
@@ -343,19 +342,13 @@ public class GUIHelper {
 		    		}});
 		}
 		
-//		public void updateProgressBar(){
-//			apmd5.display.syncExec(
-//					new Runnable() {
-//					public void run(){
-//						apmd5.progressBar.setSelection(apmd5.progressBar.getSelection()+1);
-//		    		}});
-//		}
-		
 		public void recurseDirectory(final File file, final PrintWriter pw){
-			
+			if(!apmd5.isExecuting.get()) { return;}
 			if(file.isDirectory()){
 				File files[] = file.listFiles();
 	    		for(int i=0; i<files.length; i++){
+	    			if(!apmd5.isExecuting.get()) { break;}
+	    			
 	    			if(files[i] != null){
 	    				recurseDirectory(files[i], pw);
 	    			}
@@ -376,11 +369,13 @@ public class GUIHelper {
 			File files[] = file.listFiles();
 			
 			for(int i=0; i<files.length; i++){
+				if(!apmd5.isExecuting.get()) { break;}
+				
 				if(files[i] != null){
 					if(!files[i].isDirectory()){
 						updateStatus("Calculating checksum for file " + files[i].getName() + "...");
 						
-						final String hash = checksumCalculator.calculate(files[i]);
+						final String hash = defaultString(checksumCalculator.calculate(files[i]),"(ERROR)");
 						
 		    			if(pw != null) { pw.println(hash+ MD5Constants.MD5_SPACER +files[i].getName());}
 		    			updateResult(hash+ MD5Constants.MD5_SPACER +"("+files[i].getName()+")\n");
@@ -389,30 +384,8 @@ public class GUIHelper {
 				}// end if != null 
 			}// end for 
 		}// end singleDirectory
-		
-		
-    	
     }
-	
-//    public static class PopulateCalcChecksum implements Callable<Boolean> {
-//    	private final Future<ChecksumCalcResult> result;
-//    	private final APMD5 apmd5;
-//    	
-//    	public PopulateCalcChecksum(Future<ChecksumCalcResult> result, APMD5 apmd5){
-//    		this.result = result;
-//    		this.apmd5 = apmd5;
-//    	}
-//    	
-//		@Override
-//		public Boolean call() throws Exception {
-//			// TODO Auto-generated method stub
-//			
-//			//caculateResultStyledText
-//			return null;
-//		}
-//    	
-//    }
-    
+
 	public static class IndeterminentProgressBar implements Callable<String> {
 
 		ProgressBar pb = null;
@@ -428,8 +401,6 @@ public class GUIHelper {
 		public String call() {
 			final int inc = 10;
 			final long sleepTime = 150;
-
-			//isExecuting.set(true);
 
 			shell.getDisplay().syncExec(new Runnable() {
 				public void run() {
@@ -461,10 +432,7 @@ public class GUIHelper {
 				}
 			});
 
-			//isExecuting.set(false);
-
 			return "done";
-
 		}
 
 	}
