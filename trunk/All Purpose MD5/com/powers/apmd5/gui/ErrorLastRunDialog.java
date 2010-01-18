@@ -129,7 +129,7 @@ public class ErrorLastRunDialog extends Dialog {
 				}
 			}
 		});
-		launchBrowserButton.setBounds(117, 394, 87, 23);
+		launchBrowserButton.setBounds(91, 394, 113, 23);
 		launchBrowserButton.setText("Launch Browser");
 		
 		Button noThanks = new Button(shell, SWT.NONE);
@@ -139,7 +139,7 @@ public class ErrorLastRunDialog extends Dialog {
 				shell.close();
 			}
 		});
-		noThanks.setBounds(210, 394, 87, 23);
+		noThanks.setBounds(210, 394, 113, 23);
 		noThanks.setText("No Thanks");
 
 	}
