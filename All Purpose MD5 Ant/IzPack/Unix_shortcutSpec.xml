@@ -8,12 +8,11 @@
   <shortcut
      name="All Purpose MD5"
      programGroup="yes"
-     desktop="yes"
+     desktop="no"
      applications="no"
      startMenu="yes"
      startup="no"
      description="All Purpose MD5"
-     workingDirectory="$INSTALL_PATH" 
      target="java" 
      commandLine="-jar &quot;$INSTALL_PATH/APMD5.jar&quot;"
      iconFile="$INSTALL_PATH/images/checksum.png"
@@ -26,8 +25,9 @@
      <createForPack name="Application"/>
    </shortcut>
 
-	<!--workingDirectory="&quot;$INSTALL_PATH&quot;"      
-	target="$INSTALL_PATH/apmd5.sh" -->
+	<!--
+	workingDirectory="$INSTALL_PATH/"  <-- doesn't work...
+	-->
 
    <shortcut
      name="All Purpose MD5 Uninstaller"
@@ -49,5 +49,4 @@
      <createForPack name="Application" />
    </shortcut>
 
-<!--      iconFile="trashcan_full" -->
 </shortcuts>
