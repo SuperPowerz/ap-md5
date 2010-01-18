@@ -151,7 +151,7 @@ or go to http://www.gnu.org/licenses/gpl.html.
   	<!-- Copy Source to src directory -->
   	<copy todir="${dist.src}">
   		<fileset dir="${src}">
-  			<include name="com.powers.apmd5/*"/>
+  			<include name="com/powers/apmd5/**/*.java"/>
   			<include name="images/*.png"/>
   			<include name="**/com/swtdesigner/*.java"/>
   		</fileset>
